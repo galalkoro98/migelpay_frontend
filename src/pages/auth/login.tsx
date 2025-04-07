@@ -8,7 +8,6 @@ import { ReCAPTCHA } from "@/utils/reCAPTCHA";
 import { reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
 import { useGoogleLogin } from "@/hooks/useGoogleLogin";
 import { useFacebookLogin } from "@/hooks/useFacebookLogin";
-// import { useUser } from "@/context/UserContext";
 
 export default function LoginPage() {
     const [useEmail, setUseEmail] = useState(true);
@@ -23,7 +22,6 @@ export default function LoginPage() {
     const router = useRouter();
     const { triggerGoogleLogin } = useGoogleLogin();
     const { triggerFacebookLogin } = useFacebookLogin();
-    // const { setUser, setToken } = useUser();
 
     const handleRecaptchaChange = (token: string | null) => setRecaptchaToken(token);
 
@@ -189,7 +187,7 @@ export default function LoginPage() {
                 </div>
 
                 <p className="text-sm text-center text-black">
-                    Not a member? <Link href="/signup" className="text-blue-600 hover:underline">Sign up now</Link>
+                    Not a member? <Link href="/auth/signup" className="text-blue-600 hover:underline">Sign up now</Link>
                 </p>
             </div>
         </div>
