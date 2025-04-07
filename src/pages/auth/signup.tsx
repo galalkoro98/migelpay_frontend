@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 import Link from "next/link";
@@ -75,6 +75,21 @@ export default function SignupPage() {
         }
     };
 
+    useEffect(() => {
+        if (typeof window !== "undefined" && !window.recaptchaVerifier) {
+            window.recaptchaVerifier = new RecaptchaVerifier(
+                auth,
+                "recaptcha-container",
+                {
+                    size: "invisible",
+                    callback: () => {
+                        console.log("reCAPTCHA solved");
+                    },
+                }
+            );
+        }
+    }, []);
+
     const handleSendOtp = async () => {
         if (!form.phone) {
             setError("Phone number is required");
@@ -85,20 +100,6 @@ export default function SignupPage() {
         setError(null);
 
         try {
-            // Only initialize once
-            if (!window.recaptchaVerifier) {
-                window.recaptchaVerifier = new RecaptchaVerifier(
-                    auth,
-                    "recaptcha-container",
-                    {
-                        size: "invisible",
-                        callback: () => {
-                            console.log("reCAPTCHA solved");
-                        },
-                    }
-                );
-            }
-
             const appVerifier = window.recaptchaVerifier;
             const confirmationResult = await signInWithPhoneNumber(auth, form.phone, appVerifier);
 
