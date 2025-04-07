@@ -2,6 +2,8 @@ import axios from "axios";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { baseURL } from "@/utils/baseURL";
+import Dotenv from "dotenv";
+Dotenv.config();
 
 export const useGoogleSignup = () => {
     const router = useRouter();
