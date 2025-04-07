@@ -23,8 +23,49 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [firebaseToken, setFirebaseToken] = useState("");
+    const [recaptchaReady, setRecaptchaReady] = useState(false);
     const { triggerGoogleSignup } = useGoogleSignup();
     const router = useRouter();
+
+    // Initialize reCAPTCHA verifier
+    useEffect(() => {
+        // Only run on client side
+        if (typeof window !== "undefined") {
+            try {
+                // Clear any existing recaptcha
+                if (window.recaptchaVerifier) {
+                    window.recaptchaVerifier.clear();
+                    delete window.recaptchaVerifier;
+                }
+
+                // Create new recaptcha verifier
+                const verifier = new RecaptchaVerifier(
+                    auth,  // Auth instance first
+                    "recaptcha-container",  // Then the container ID
+                    {
+                        size: "invisible",
+                        callback: () => {
+                            console.log("reCAPTCHA solved");
+                        },
+                    }
+                );
+
+                window.recaptchaVerifier = verifier;
+                setRecaptchaReady(true);
+
+                // Cleanup function
+                return () => {
+                    if (verifier) {
+                        verifier.clear();
+                    }
+                    delete window.recaptchaVerifier;
+                };
+            } catch (error) {
+                console.error("reCAPTCHA initialization error:", error);
+                setError("Failed to initialize reCAPTCHA. Please refresh the page.");
+            }
+        }
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -75,21 +116,6 @@ export default function SignupPage() {
         }
     };
 
-    useEffect(() => {
-        if (typeof window !== "undefined" && !window.recaptchaVerifier) {
-            window.recaptchaVerifier = new RecaptchaVerifier(
-                auth,
-                "recaptcha-container",
-                {
-                    size: "invisible",
-                    callback: () => {
-                        console.log("reCAPTCHA solved");
-                    },
-                }
-            );
-        }
-    }, []);
-
     const handleSendOtp = async () => {
         if (!form.phone) {
             setError("Phone number is required");
@@ -100,11 +126,17 @@ export default function SignupPage() {
         setError(null);
 
         try {
-            const appVerifier = window.recaptchaVerifier;
-            const confirmationResult = await signInWithPhoneNumber(auth, form.phone, appVerifier);
+            if (!window.recaptchaVerifier) {
+                throw new Error("reCAPTCHA not initialized");
+            }
+
+            const confirmationResult = await signInWithPhoneNumber(
+                auth,
+                form.phone,
+                window.recaptchaVerifier
+            );
 
             const otpCode = prompt("Enter the OTP sent to your phone:");
-
             if (!otpCode) {
                 throw new Error("OTP was not entered");
             }
@@ -128,7 +160,6 @@ export default function SignupPage() {
         }
     };
 
-
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-pink-500 via-purple-500 to-blue-600">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -137,13 +168,13 @@ export default function SignupPage() {
                 <div className="flex mb-4">
                     <button
                         onClick={() => setUseEmail(true)}
-                        className={`flex-1 py-2 ${useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600'}`}
+                        className={`flex-1 py-2 ${useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white'}`}
                     >
                         Email
                     </button>
                     <button
                         onClick={() => setUseEmail(false)}
-                        className={`flex-1 py-2 ${!useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600'}`}
+                        className={`flex-1 py-2 ${!useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white'}`}
                     >
                         Phone
                     </button>
@@ -210,7 +241,7 @@ export default function SignupPage() {
                                 placeholder="Phone Number (with country code)"
                                 value={form.phone}
                                 onChange={handleChange}
-                                className="w-full p-3 mb-4 border rounded"
+                                className="w-full p-3 mb-4 border rounded text-black"
                                 required
                             />
                             <div className="flex gap-2 mb-4">
@@ -218,14 +249,14 @@ export default function SignupPage() {
                                     placeholder="Enter OTP"
                                     value={firebaseToken}
                                     onChange={(e) => setFirebaseToken(e.target.value)}
-                                    className="flex-1 p-3 border rounded"
+                                    className="flex-1 p-3 border rounded text-black"
                                     disabled={!otpSent}
                                     required
                                 />
                                 <button
                                     type="button"
                                     onClick={handleSendOtp}
-                                    disabled={otpSent}
+                                    disabled={!recaptchaReady || otpSent}
                                     className="bg-blue-500 text-white px-4 rounded disabled:bg-gray-300"
                                 >
                                     {otpSent ? "Sent" : "Get OTP"}
@@ -256,7 +287,7 @@ export default function SignupPage() {
                     </button>
                     <button
                         onClick={triggerGoogleSignup}
-                        className="w-[48%] flex items-center justify-center gap-2 border py-2 rounded bg-red-900 text-red hover:bg-red-300"
+                        className="w-[48%] flex items-center justify-center gap-2 border py-2 rounded bg-red-900 text-white hover:bg-red-300"
                     >
                         <FaGoogle className="text-xl" />
                         Google
