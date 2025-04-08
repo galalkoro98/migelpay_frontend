@@ -144,13 +144,8 @@ export default function StarlinkPayment() {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Payment Form */}
                         <div className="lg:col-span-2 bg-white p-6 sm:p-8 rounded-xl shadow-md">
-                            {isClient && (
-                                <ReCAPTCHA
-                                    sitekey={reCAPTCHA_SITE_KEY}
-                                    onChange={(token) => setRecaptchaToken(token || '')}
-                                />
-                            )}
                             <form onSubmit={handleSubmit} className="space-y-6">
+
                                 {/* Subscription Amount Input */}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
@@ -313,6 +308,12 @@ export default function StarlinkPayment() {
 
                                 {/* Submit Button */}
                                 <div>
+                                    {isClient && (
+                                        <ReCAPTCHA
+                                            sitekey={reCAPTCHA_SITE_KEY}
+                                            onChange={(token) => setRecaptchaToken(token || '')}
+                                        />
+                                    )}
                                     <button
                                         type="submit"
                                         disabled={
@@ -370,7 +371,7 @@ export default function StarlinkPayment() {
                                     <h3 className="font-medium text-gray-900 mb-4">Contact After Payment</h3>
                                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col items-center text-center space-y-4">
                                         <div className="relative">
-                            
+
                                             <Image
                                                 src={contactInfo.contactPerson.photo}
                                                 alt={contactInfo.contactPerson.name}

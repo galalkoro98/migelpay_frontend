@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/router";
 import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 import Link from "next/link";
@@ -6,7 +6,8 @@ import axios from "axios";
 import { baseURL } from "@/utils/baseURL";
 import { useGoogleSignup } from "@/hooks/useGoogleSignup";
 import { auth } from "@/lib/firebase";
-import { signInWithPhoneNumber, RecaptchaVerifier } from "firebase/auth";
+import { signInWithPhoneNumber } from "firebase/auth"; //RecaptchaVerifier
+import { ReCAPTCHA, reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
 
 export default function SignupPage() {
     const [useEmail, setUseEmail] = useState(true);
@@ -23,49 +24,8 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [firebaseToken, setFirebaseToken] = useState("");
-    const [recaptchaReady, setRecaptchaReady] = useState(false);
     const { triggerGoogleSignup } = useGoogleSignup();
     const router = useRouter();
-
-    // Initialize reCAPTCHA verifier
-    useEffect(() => {
-        // Only run on client side
-        if (typeof window !== "undefined") {
-            try {
-                // Clear any existing recaptcha
-                if (window.recaptchaVerifier) {
-                    window.recaptchaVerifier.clear();
-                    delete window.recaptchaVerifier;
-                }
-
-                // Create new recaptcha verifier
-                const verifier = new RecaptchaVerifier(
-                    auth,  // Auth instance first
-                    "recaptcha-container",  // Then the container ID
-                    {
-                        size: "invisible",
-                        callback: () => {
-                            console.log("reCAPTCHA solved");
-                        },
-                    }
-                );
-
-                window.recaptchaVerifier = verifier;
-                setRecaptchaReady(true);
-
-                // Cleanup function
-                return () => {
-                    if (verifier) {
-                        verifier.clear();
-                    }
-                    delete window.recaptchaVerifier;
-                };
-            } catch (error) {
-                console.error("reCAPTCHA initialization error:", error);
-                setError("Failed to initialize reCAPTCHA. Please refresh the page.");
-            }
-        }
-    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
@@ -126,14 +86,15 @@ export default function SignupPage() {
         setError(null);
 
         try {
-            if (!window.recaptchaVerifier) {
-                throw new Error("reCAPTCHA not initialized");
-            }
+            // Initialize reCAPTCHA
+            // if (!window.recaptchaVerifier) {
+            //     throw new Error("reCAPTCHA not initialized");
+            // }
 
             const confirmationResult = await signInWithPhoneNumber(
                 auth,
                 form.phone,
-                window.recaptchaVerifier
+                // window.recaptchaVerifier
             );
 
             const otpCode = prompt("Enter the OTP sent to your phone:");
@@ -160,11 +121,12 @@ export default function SignupPage() {
         }
     };
 
+
+
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-pink-500 via-purple-500 to-blue-600">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
                 <h1 className="text-2xl font-bold text-center mb-6 text-gray-700">CREATE ACCOUNT</h1>
-
                 <div className="flex mb-4">
                     <button
                         onClick={() => setUseEmail(true)}
@@ -179,8 +141,9 @@ export default function SignupPage() {
                         Phone
                     </button>
                 </div>
-
                 <form onSubmit={handleSubmit}>
+                    {useEmail && <ReCAPTCHA sitekey={reCAPTCHA_SITE_KEY} />}
+
                     {useEmail ? (
                         <>
                             <input
@@ -256,7 +219,7 @@ export default function SignupPage() {
                                 <button
                                     type="button"
                                     onClick={handleSendOtp}
-                                    disabled={!recaptchaReady || otpSent}
+                                    disabled={otpSent}
                                     className="bg-blue-500 text-white px-4 rounded disabled:bg-gray-300"
                                 >
                                     {otpSent ? "Sent" : "Get OTP"}
@@ -264,10 +227,8 @@ export default function SignupPage() {
                             </div>
                         </>
                     )}
-                    <div id="recaptcha-container" className="mb-4"></div>
 
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-
                     <button
                         type="submit"
                         disabled={loading}

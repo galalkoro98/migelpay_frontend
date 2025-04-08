@@ -4,8 +4,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 import { baseURL } from '@/utils/baseURL';
-import { ReCAPTCHA } from "@/utils/reCAPTCHA";
-import { reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
+import { ReCAPTCHA, reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
 import { useGoogleLogin } from "@/hooks/useGoogleLogin";
 import { useFacebookLogin } from "@/hooks/useFacebookLogin";
 
