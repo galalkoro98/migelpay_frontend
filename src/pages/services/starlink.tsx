@@ -4,15 +4,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CURRENCY_RATES } from '@/utils/currencyRates';
 import { baseURL } from '@/utils/baseURL';
-import { ReCAPTCHA, reCAPTCHA_SITE_KEY } from '@/utils/reCAPTCHA';
 import Link from 'next/link';
+import Recaptcha from "@/components/Recaptcha";
 
 export default function StarlinkPayment() {
-    const [isClient, setIsClient] = useState(false);
-    useEffect(() => {
-        setIsClient(true);
-    }, []);
-
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -22,10 +17,15 @@ export default function StarlinkPayment() {
         paymentProof: null as File | null,
         termsAgreed: false
     });
-    const [recaptchaToken, setRecaptchaToken] = useState('');
+    // const [recaptchaToken, setRecaptchaToken] = useState('');
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const PROCESSING_FEE = 26000; // 26,000 SDG
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+
+    const handleCaptcha = (token: string | null) => {
+        setCaptchaToken(token);
+    };
 
     // Calculate amount whenever amount or currency changes
     useEffect(() => {
@@ -74,7 +74,13 @@ export default function StarlinkPayment() {
                 formPayload.append('paymentProof', formData.paymentProof);
             }
 
-            formPayload.append('g-recaptcha-response', recaptchaToken); // ⬅️ This line is key
+            // Append reCAPTCHA token if available
+            const recaptchaToken = captchaToken || '';
+            if (!recaptchaToken) {
+                setSubmissionStatus('error');
+                return;
+            }
+            formPayload.append('recaptchaToken', recaptchaToken);
 
             // Simulate API call
             const response = await fetch(`${baseURL}/api/web/starlink/submit`, {
@@ -95,7 +101,8 @@ export default function StarlinkPayment() {
                 paymentProof: null,
                 termsAgreed: false
             });
-            setRecaptchaToken('');
+            setCalculatedAmount(0);
+            setCaptchaToken(null); // Reset reCAPTCHA token after successful submission
         } catch (error) {
             console.error('Error submitting form:', error);
             setSubmissionStatus('error');
@@ -308,18 +315,19 @@ export default function StarlinkPayment() {
 
                                 {/* Submit Button */}
                                 <div>
-                                    {isClient && (
-                                        <ReCAPTCHA
-                                            sitekey={reCAPTCHA_SITE_KEY}
-                                            onChange={(token) => setRecaptchaToken(token || '')}
-                                        />
-                                    )}
+                                    <Recaptcha onVerify={handleCaptcha} />
+                                    <p className="text-xs text-gray-500 mb-2">We use reCAPTCHA to prevent spam.</p>
                                     <button
                                         type="submit"
                                         disabled={
+                                            !formData.termsAgreed ||
                                             submissionStatus === 'submitting' ||
-                                            calculatedAmount <= 0 ||
-                                            !recaptchaToken
+                                            !formData.email ||
+                                            !formData.password ||
+                                            !formData.subscriptionAmount ||
+                                            !formData.invoiceNumber ||
+                                            !formData.paymentProof ||
+                                            !captchaToken
                                         }
                                         className={`w-full py-2 px-4 rounded-md text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${submissionStatus === 'submitting' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                                     >

@@ -19,10 +19,27 @@ declare module "next-auth" {
   }
 }
 
-
 declare global {
   interface Window {
-    recaptchaVerifier: firebase.auth.RecaptchaVerifier;
-    
+    grecaptcha?: {
+      render: (container: HTMLElement, parameters: { sitekey: string; callback?: (token: string) => void; "error-callback"?: () => void; "expired-callback"?: () => void }) => number;
+      reset: (widgetId: number) => void;
+      ready: (callback: () => void) => void;
+    };
   }
 }
+
+export { };
+
+
+
+
+// declare global {
+//   interface Window {
+//     grecaptcha?: {
+//       ready: (callback: () => void) => void;
+//       render: (container: HTMLElement, parameters: { sitekey: string; callback: (token: string) => void; "error-callback"?: () => void; "expired-callback"?: () => void }) => void;
+//     };
+//   }
+// }
+

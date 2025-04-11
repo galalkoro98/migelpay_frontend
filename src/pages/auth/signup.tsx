@@ -6,8 +6,8 @@ import axios from "axios";
 import { baseURL } from "@/utils/baseURL";
 import { useGoogleSignup } from "@/hooks/useGoogleSignup";
 import { auth } from "@/lib/firebase";
-import { signInWithPhoneNumber } from "firebase/auth"; //RecaptchaVerifier
-import { ReCAPTCHA, reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
+import { signInWithPhoneNumber } from "firebase/auth";
+import Recaptcha from "@/components/Recaptcha";
 
 export default function SignupPage() {
     const [useEmail, setUseEmail] = useState(true);
@@ -24,9 +24,13 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [firebaseToken, setFirebaseToken] = useState("");
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const { triggerGoogleSignup } = useGoogleSignup();
     const router = useRouter();
 
+    const handleCaptcha = (token: string | null) => {
+        setCaptchaToken(token);
+    };
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
     };
@@ -35,6 +39,12 @@ export default function SignupPage() {
         e.preventDefault();
         setError(null);
         setLoading(true);
+
+        if (useEmail && !captchaToken) {
+            setError("Please complete the reCAPTCHA");
+            setLoading(false);
+            return;
+        }
 
         // Basic validation
         if (useEmail) {
@@ -86,10 +96,6 @@ export default function SignupPage() {
         setError(null);
 
         try {
-            // Initialize reCAPTCHA
-            // if (!window.recaptchaVerifier) {
-            //     throw new Error("reCAPTCHA not initialized");
-            // }
 
             const confirmationResult = await signInWithPhoneNumber(
                 auth,
@@ -142,8 +148,6 @@ export default function SignupPage() {
                     </button>
                 </div>
                 <form onSubmit={handleSubmit}>
-                    {useEmail && <ReCAPTCHA sitekey={reCAPTCHA_SITE_KEY} />}
-
                     {useEmail ? (
                         <>
                             <input
@@ -237,6 +241,8 @@ export default function SignupPage() {
                         {loading ? <FaSpinner className="animate-spin" /> : null}
                         CREATE ACCOUNT
                     </button>
+                    <Recaptcha onVerify={handleCaptcha} />
+                    {captchaToken && <p className="text-green-500 text-sm mb-2">reCAPTCHA verified</p>}
                 </form>
 
                 <p className="text-center text-sm mb-2">Or sign up with</p>

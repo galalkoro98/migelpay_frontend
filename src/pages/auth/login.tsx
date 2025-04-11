@@ -4,25 +4,27 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 import { baseURL } from '@/utils/baseURL';
-import { ReCAPTCHA, reCAPTCHA_SITE_KEY } from "@/utils/reCAPTCHA";
 import { useGoogleLogin } from "@/hooks/useGoogleLogin";
 import { useFacebookLogin } from "@/hooks/useFacebookLogin";
+import Recaptcha from "@/components/Recaptcha";
 
 export default function LoginPage() {
+    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [useEmail, setUseEmail] = useState(true);
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
     const [firebaseToken, setFirebaseToken] = useState("");
-    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
-
     const router = useRouter();
     const { triggerGoogleLogin } = useGoogleLogin();
     const { triggerFacebookLogin } = useFacebookLogin();
 
-    const handleRecaptchaChange = (token: string | null) => setRecaptchaToken(token);
+
+    const handleCaptcha = (token: string | null) => {
+        setCaptchaToken(token);
+    };
 
     const validateInputs = () => {
         if (!identifier) {
@@ -34,7 +36,7 @@ export default function LoginPage() {
         if (!useEmail && !firebaseToken && otpSent) {
             return "OTP is required";
         }
-        if (!recaptchaToken) {
+        if (!captchaToken) {
             return "Please complete the reCAPTCHA";
         }
         return null;
@@ -44,6 +46,8 @@ export default function LoginPage() {
         e.preventDefault();
         setError(null);
         setLoading(true);
+        setOtpSent(false);
+        setCaptchaToken(null);
 
         const validationError = validateInputs();
         if (validationError) {
@@ -60,6 +64,7 @@ export default function LoginPage() {
             const res = await axios.post(`${baseURL}/api/web/auth/login/user-login`, payload);
             if (res.data.jwt) {
                 localStorage.setItem("token", res.data.jwt);
+                localStorage.setItem("user", JSON.stringify(res.data.user));
                 router.push("/dashboard");
             }
         } catch (err) {
@@ -78,7 +83,13 @@ export default function LoginPage() {
 
         try {
             setLoading(true);
+            setOtpSent(false);
+            setFirebaseToken("");
+            setCaptchaToken(null);
+            setError(null);
             await axios.post(`${baseURL}/api/web/auth/phone/signup`, { phone: identifier });
+            setError("OTP sent successfully to your phone number");
+
             setOtpSent(true);
         } catch {
             setError("Failed to send OTP");
@@ -152,10 +163,8 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    <div className="mb-4">
-                        <ReCAPTCHA sitekey={reCAPTCHA_SITE_KEY} onChange={handleRecaptchaChange} />
-                    </div>
-
+                    <Recaptcha onVerify={handleCaptcha} />
+                    {captchaToken && <p className="text-green-500 text-sm mb-2">reCAPTCHA verified</p>}
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
                     <button
