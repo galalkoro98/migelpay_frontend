@@ -31,6 +31,7 @@ export const useGoogleLogin = () => {
     }, [router]);
 
     const triggerGoogleLogin = () => {
+        if (!window.google) return;
         window.google.accounts.id.prompt();
     };
 

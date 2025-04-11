@@ -33,18 +33,10 @@ export const useGoogleSignup = () => {
         });
     }, [router]);
 
-
     const triggerGoogleSignup = () => {
-        if (!window.google) {
-            alert("Google API not loaded. Please try again later.");
-            return;
-        }
-
+        if (!window.google) return;
         window.google.accounts.id.prompt();
     };
 
-
-
     return { triggerGoogleSignup };
-
 };

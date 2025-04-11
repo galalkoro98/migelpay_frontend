@@ -5,7 +5,6 @@ import Footer from '@/components/Footer';
 import { CURRENCY_RATES } from '@/utils/currencyRates';
 import { baseURL } from '@/utils/baseURL';
 import Link from 'next/link';
-import Recaptcha from "@/components/Recaptcha";
 
 export default function StarlinkPayment() {
     const [formData, setFormData] = useState({
@@ -17,15 +16,9 @@ export default function StarlinkPayment() {
         paymentProof: null as File | null,
         termsAgreed: false
     });
-    // const [recaptchaToken, setRecaptchaToken] = useState('');
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const PROCESSING_FEE = 26000; // 26,000 SDG
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
-
-    const handleCaptcha = (token: string | null) => {
-        setCaptchaToken(token);
-    };
 
     // Calculate amount whenever amount or currency changes
     useEffect(() => {
@@ -74,13 +67,6 @@ export default function StarlinkPayment() {
                 formPayload.append('paymentProof', formData.paymentProof);
             }
 
-            // Append reCAPTCHA token if available
-            const recaptchaToken = captchaToken || '';
-            if (!recaptchaToken) {
-                setSubmissionStatus('error');
-                return;
-            }
-            formPayload.append('recaptchaToken', recaptchaToken);
 
             // Simulate API call
             const response = await fetch(`${baseURL}/api/web/starlink/submit`, {
@@ -102,7 +88,6 @@ export default function StarlinkPayment() {
                 termsAgreed: false
             });
             setCalculatedAmount(0);
-            setCaptchaToken(null); // Reset reCAPTCHA token after successful submission
         } catch (error) {
             console.error('Error submitting form:', error);
             setSubmissionStatus('error');
@@ -315,7 +300,7 @@ export default function StarlinkPayment() {
 
                                 {/* Submit Button */}
                                 <div>
-                                    <Recaptcha onVerify={handleCaptcha} />
+                                    {/* <Recaptcha onVerify={handleCaptcha} /> */}
                                     <p className="text-xs text-gray-500 mb-2">We use reCAPTCHA to prevent spam.</p>
                                     <button
                                         type="submit"
@@ -327,7 +312,7 @@ export default function StarlinkPayment() {
                                             !formData.subscriptionAmount ||
                                             !formData.invoiceNumber ||
                                             !formData.paymentProof ||
-                                            !captchaToken
+                                            calculatedAmount <= 0
                                         }
                                         className={`w-full py-2 px-4 rounded-md text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${submissionStatus === 'submitting' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                                     >

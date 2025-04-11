@@ -6,10 +6,8 @@ import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 import { baseURL } from '@/utils/baseURL';
 import { useGoogleLogin } from "@/hooks/useGoogleLogin";
 import { useFacebookLogin } from "@/hooks/useFacebookLogin";
-import Recaptcha from "@/components/Recaptcha";
 
 export default function LoginPage() {
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const [useEmail, setUseEmail] = useState(true);
     const [identifier, setIdentifier] = useState("");
     const [password, setPassword] = useState("");
@@ -21,23 +19,13 @@ export default function LoginPage() {
     const { triggerGoogleLogin } = useGoogleLogin();
     const { triggerFacebookLogin } = useFacebookLogin();
 
-
-    const handleCaptcha = (token: string | null) => {
-        setCaptchaToken(token);
-    };
-
     const validateInputs = () => {
-        if (!identifier) {
-            return useEmail ? "Email is required" : "Phone number is required";
-        }
-        if (useEmail && !password) {
-            return "Password is required";
-        }
-        if (!useEmail && !firebaseToken && otpSent) {
-            return "OTP is required";
-        }
-        if (!captchaToken) {
-            return "Please complete the reCAPTCHA";
+        if (useEmail) {
+            if (!identifier || !password) return "Email and password are required";
+            if (!/\S+@\S+\.\S+/.test(identifier)) return "Invalid email format";
+        } else {
+            if (!identifier) return "Phone number is required";
+            if (!firebaseToken) return "OTP is required";
         }
         return null;
     };
@@ -47,7 +35,7 @@ export default function LoginPage() {
         setError(null);
         setLoading(true);
         setOtpSent(false);
-        setCaptchaToken(null);
+
 
         const validationError = validateInputs();
         if (validationError) {
@@ -85,7 +73,6 @@ export default function LoginPage() {
             setLoading(true);
             setOtpSent(false);
             setFirebaseToken("");
-            setCaptchaToken(null);
             setError(null);
             await axios.post(`${baseURL}/api/web/auth/phone/signup`, { phone: identifier });
             setError("OTP sent successfully to your phone number");
@@ -163,8 +150,6 @@ export default function LoginPage() {
                         </div>
                     )}
 
-                    <Recaptcha onVerify={handleCaptcha} />
-                    {captchaToken && <p className="text-green-500 text-sm mb-2">reCAPTCHA verified</p>}
                     {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
                     <button

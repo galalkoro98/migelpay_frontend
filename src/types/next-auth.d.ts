@@ -1,5 +1,4 @@
 import "next-auth";
-
 declare module "next-auth" {
   interface Session {
     user: {
@@ -18,28 +17,9 @@ declare module "next-auth" {
     accessToken?: string; // ✅ Ensure User type includes accessToken
   }
 }
-
 declare global {
   interface Window {
-    grecaptcha?: {
-      render: (container: HTMLElement, parameters: { sitekey: string; callback?: (token: string) => void; "error-callback"?: () => void; "expired-callback"?: () => void }) => number;
-      reset: (widgetId: number) => void;
-      ready: (callback: () => void) => void;
-    };
+    recaptchaVerifier?: import("firebase/auth").RecaptchaVerifier;
+    confirmationResult?: import("firebase/auth").ConfirmationResult;
   }
 }
-
-export { };
-
-
-
-
-// declare global {
-//   interface Window {
-//     grecaptcha?: {
-//       ready: (callback: () => void) => void;
-//       render: (container: HTMLElement, parameters: { sitekey: string; callback: (token: string) => void; "error-callback"?: () => void; "expired-callback"?: () => void }) => void;
-//     };
-//   }
-// }
-

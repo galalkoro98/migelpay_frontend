@@ -1,13 +1,11 @@
 import { useState } from "react";
-import { useRouter } from "next/router";
-import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
-import Link from "next/link";
 import axios from "axios";
+import Link from "next/link";
+import { useRouter } from "next/router";
 import { baseURL } from "@/utils/baseURL";
 import { useGoogleSignup } from "@/hooks/useGoogleSignup";
-import { auth } from "@/lib/firebase";
-import { signInWithPhoneNumber } from "firebase/auth";
-import Recaptcha from "@/components/Recaptcha";
+import { auth, signInWithPhoneNumber, } from "@/lib/firebase";
+import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
 
 export default function SignupPage() {
     const [useEmail, setUseEmail] = useState(true);
@@ -18,33 +16,63 @@ export default function SignupPage() {
         phone: "",
         password: "",
         sex: "male",
-        country: ""
+        country: "",
     });
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [firebaseToken, setFirebaseToken] = useState("");
-    const [captchaToken, setCaptchaToken] = useState<string | null>(null);
     const { triggerGoogleSignup } = useGoogleSignup();
     const router = useRouter();
 
-    const handleCaptcha = (token: string | null) => {
-        setCaptchaToken(token);
-    };
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSendOtp = async () => {
+        if (!form.phone) {
+            setError("Phone number is required");
+            return;
+        }
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const appVerifier = window.recaptchaVerifier;
+            const confirmationResult = await signInWithPhoneNumber(auth, form.phone, appVerifier!);
+            window.confirmationResult = confirmationResult;
+            setOtpSent(true);
+            alert("OTP sent to your phone number.");
+        } catch (error: unknown) {
+            console.error("OTP Error:", error);
+            setError("Failed to send OTP");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyOtp = async (otpCode: string) => {
+        if (!otpCode || !window.confirmationResult) {
+            setError("OTP code is required");
+            return;
+        }
+
+        try {
+            const result = await window.confirmationResult.confirm(otpCode);
+            const token = await result.user.getIdToken();
+            setFirebaseToken(token);
+            setError(null);
+        } catch (error: unknown) {
+            console.error("OTP Verification Error:", error);
+            setError("Failed to verify OTP");
+        }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
-
-        if (useEmail && !captchaToken) {
-            setError("Please complete the reCAPTCHA");
-            setLoading(false);
-            return;
-        }
 
         // Basic validation
         if (useEmail) {
@@ -53,14 +81,17 @@ export default function SignupPage() {
                 setLoading(false);
                 return;
             }
-        } else if (!form.phone) {
-            setError("Phone number is required");
+        } else if (!form.phone || !firebaseToken) {
+            setError("Phone number and OTP verification are required");
             setLoading(false);
             return;
         }
 
         try {
-            const endpoint = useEmail ? `${baseURL}/api/web/auth/email/signup` : `${baseURL}/api/web/auth/phone/signup`;
+            const endpoint = useEmail
+                ? `${baseURL}/api/web/auth/email/signup`
+                : `${baseURL}/api/web/auth/phone/signup`;
+
             const body = useEmail ? { ...form, phone: undefined } : { phone: form.phone, firebaseToken };
 
             const res = await axios.post(endpoint, body);
@@ -86,49 +117,6 @@ export default function SignupPage() {
         }
     };
 
-    const handleSendOtp = async () => {
-        if (!form.phone) {
-            setError("Phone number is required");
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
-        try {
-
-            const confirmationResult = await signInWithPhoneNumber(
-                auth,
-                form.phone,
-                // window.recaptchaVerifier
-            );
-
-            const otpCode = prompt("Enter the OTP sent to your phone:");
-            if (!otpCode) {
-                throw new Error("OTP was not entered");
-            }
-
-            const result = await confirmationResult.confirm(otpCode);
-            const token = await result.user.getIdToken();
-
-            setFirebaseToken(token);
-            setOtpSent(true);
-            setError(null);
-        } catch (error: unknown) {
-            if (error instanceof Error) {
-                console.error("OTP Error:", error);
-                setError(error.message || "Failed to verify OTP");
-            } else {
-                console.error("Unexpected error:", error);
-                setError("An unexpected error occurred");
-            }
-        } finally {
-            setLoading(false);
-        }
-    };
-
-
-
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-pink-500 via-purple-500 to-blue-600">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
@@ -136,13 +124,13 @@ export default function SignupPage() {
                 <div className="flex mb-4">
                     <button
                         onClick={() => setUseEmail(true)}
-                        className={`flex-1 py-2 ${useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white'}`}
+                        className={`flex-1 py-2 ${useEmail ? "bg-blue-500 text-white" : "bg-gray-600 text-white"}`}
                     >
                         Email
                     </button>
                     <button
                         onClick={() => setUseEmail(false)}
-                        className={`flex-1 py-2 ${!useEmail ? 'bg-blue-500 text-white' : 'bg-gray-600 text-white'}`}
+                        className={`flex-1 py-2 ${!useEmail ? "bg-blue-500 text-white" : "bg-gray-600 text-white"}`}
                     >
                         Phone
                     </button>
@@ -214,8 +202,7 @@ export default function SignupPage() {
                             <div className="flex gap-2 mb-4">
                                 <input
                                     placeholder="Enter OTP"
-                                    value={firebaseToken}
-                                    onChange={(e) => setFirebaseToken(e.target.value)}
+                                    onChange={(e) => handleVerifyOtp(e.target.value)}
                                     className="flex-1 p-3 border rounded text-black"
                                     disabled={!otpSent}
                                     required
@@ -241,8 +228,6 @@ export default function SignupPage() {
                         {loading ? <FaSpinner className="animate-spin" /> : null}
                         CREATE ACCOUNT
                     </button>
-                    <Recaptcha onVerify={handleCaptcha} />
-                    {captchaToken && <p className="text-green-500 text-sm mb-2">reCAPTCHA verified</p>}
                 </form>
 
                 <p className="text-center text-sm mb-2">Or sign up with</p>
@@ -262,8 +247,18 @@ export default function SignupPage() {
                 </div>
 
                 <p className="text-sm text-center text-gray-600">
-                    By signing up, you agree to our <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link> and <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>.
-                    Already have an account? <Link href="/auth/login" className="text-blue-600 hover:underline">Login</Link>
+                    By signing up, you agree to our{" "}
+                    <Link href="/terms" className="text-blue-600 hover:underline">
+                        Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link href="/privacy" className="text-blue-600 hover:underline">
+                        Privacy Policy
+                    </Link>
+                    . Already have an account?{" "}
+                    <Link href="/auth/login" className="text-blue-600 hover:underline">
+                        Login
+                    </Link>
                 </p>
             </div>
         </div>
