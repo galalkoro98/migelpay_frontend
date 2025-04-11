@@ -32,7 +32,7 @@ export default function Navbar() {
             {/* Logo/Brand Section */}
             <div className="flex items-center space-x-3">
                 <Link href="/" className="flex items-center space-x-2">
-                    <Image src="/assets/logo.jpeg" alt="MigelPay Logo" width={40} height={40} className="rounded-full border-2 border-blue-600" />
+                    <Image src="/assets/favicon.ico" alt="MigelPay Logo" width={40} height={40} className="rounded-full border-2 border-blue-600" />
                     <h1 className="text-xl font-bold text-blue-600 hidden sm:block dark:text-white">MIGELPAY</h1>
                 </Link>
             </div>
