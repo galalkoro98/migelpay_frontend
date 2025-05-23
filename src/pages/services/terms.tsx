@@ -1,10 +1,26 @@
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useEffect, useState } from 'react';
+import Navbar from '@/shared/components/Navbar';
+import Footer from '@/shared/components/Footer';
 
 export default function TermsOfService() {
+    const [language, setLanguage] = useState<'en' | 'ar'>('en');
+    useEffect(() => {
+        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
+        setLanguage(lang);
+        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+        document.documentElement.lang = lang;
+    }, [setLanguage]);
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar />
+            <Navbar
+                currentLanguage={language}
+                onLanguageChange={(lang) => {
+                    localStorage.setItem('migelpay-lang', lang);
+                    setLanguage(lang);
+                    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+                    document.documentElement.lang = lang;
+                }}
+            />
 
             <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="bg-white shadow rounded-lg p-6 sm:p-8">
@@ -59,7 +75,7 @@ export default function TermsOfService() {
                 </div>
             </main>
 
-            <Footer />
+            <Footer currentLanguage={language} />
         </div>
     );
 }

@@ -15,24 +15,33 @@
     "bcryptjs": "^3.0.2",
     "dotenv": "^16.4.7",
     "firebase": "^11.6.0",
+    "g": "^2.0.1",
     "google-one-tap": "^1.0.6",
+    "i18next-browser-languagedetector": "^8.1.0",
+    "i18next-http-backend": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.0",
+    "jwt-decode": "^4.0.0",
     "latest": "^0.2.0",
     "lucide-react": "^0.477.0",
     "motion": "^12.4.2",
-    "next": "15.1.7",
+    "next": "^15.3.2",
     "next-auth": "^4.24.11",
+    "next-intl": "^4.1.0",
     "next-sitemap": "^4.2.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-firebase-hooks": "5.1.1",
     "react-google-recaptcha": "^3.1.0",
     "react-icons": "^5.4.0",
     "react-intl": "^7.1.6",
-    "react-webcam": "^7.2.0"
+    "react-webcam": "^7.2.0",
+    "swr": "^2.3.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/google-one-tap": "^1.2.6",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/next-auth": "^3.13.0",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -42,6 +51,7 @@
     "eslint-config-next": "15.1.7",
     "postcss": "^8",
     "tailwindcss": "^3.4.17",
+    "tailwindcss-rtl": "^0.9.0",
     "typescript": "^5"
   }
 }

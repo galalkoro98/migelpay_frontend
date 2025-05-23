@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import { baseURL } from "@/utils/baseURL";
+import { baseURL } from "@/shared/utils/baseURL";
 
 export default function ForgotPasswordPage() {
     const [email, setEmail] = useState("");

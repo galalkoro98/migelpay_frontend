@@ -4,10 +4,15 @@ import {
     useState,
     useEffect,
     ReactNode,
+    useCallback
 } from "react";
+import axios from "axios";
+import { baseURL } from "@/shared/utils/baseURL";
+import { jwtDecode } from "jwt-decode";
 
 type UserType = {
     _id: string;
+    id: string;
     name?: string;
     email?: string;
     birthDate?: string;
@@ -20,91 +25,172 @@ type UserType = {
     notifications?: { message: string; read: boolean }[];
 };
 
+type VerificationStatus = {
+    idVerified: boolean;
+    addressVerified: boolean;
+    faceMatched: boolean;
+};
+
 type UserContextType = {
-    // router: any;
     user: UserType | null;
     token: string | null;
     isVerified: boolean;
+    setIsVerified: (verified: boolean) => void;
     loading: boolean;
     setUser: (user: UserType | null) => void;
     setToken: (token: string | null) => void;
-    setIsVerified: (val: boolean | null) => void;
-    setLoading: (val: boolean) => void;
     logout: () => void;
+    refreshVerificationStatus: () => Promise<void>;
+    initializeUser: () => Promise<void>;
 };
 
 const UserContext = createContext<UserContextType>({
-    // router: null,
     user: null,
     token: null,
     isVerified: false,
+    setIsVerified: () => { },
+    loading: false,
     setUser: () => { },
     setToken: () => { },
-    setIsVerified: () => { },
-    setLoading: () => { },
-    loading: false,
     logout: () => { },
+    refreshVerificationStatus: async () => { },
+    initializeUser: async () => { },
 });
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
     const [user, setUser] = useState<UserType | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
-    const [isVerified, setIsVerified] = useState<boolean | null>(null);
+    const [isVerified, setIsVerified] = useState<boolean>(false);
 
-    // Load user/token from localStorage on first load
-    useEffect(() => {
-        const storedToken = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
-        if (storedToken) setToken(storedToken);
-        if (storedUser) setUser(JSON.parse(storedUser));
+
+
+    const logout = useCallback(() => {
+        setUser(null);
+        setToken(null);
+        setIsVerified(false);
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
     }, []);
 
-    // Save to localStorage when updated
+
+    const refreshVerificationStatus = useCallback(async () => {
+        if (!token) return;
+
+        setLoading(true);
+        try {
+            const res = await axios.get<VerificationStatus>(
+                `${baseURL}/api/web/user/verification-status`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            if (res.status !== 200) {
+                throw new Error("Failed to fetch verification status");
+            }
+
+            const { idVerified, addressVerified, faceMatched } = res.data;
+            const verified = idVerified && addressVerified && faceMatched;
+            setIsVerified(verified);
+        } catch (error) {
+            console.error("Verification error:", error);
+            setIsVerified(false);
+        } finally {
+            setLoading(false);
+        }
+    }, [token]);
+
+    // Initialize user from token
+    const initializeUser = useCallback(async () => {
+        const storedToken = localStorage.getItem("token");
+        if (!storedToken) return;
+
+        try {
+            setLoading(true);
+            // Verify token structure
+            if (!storedToken.startsWith("eyJ")) {
+                throw new Error("Invalid token format");
+            }
+
+            // Decode token to get basic user info
+            const decoded = jwtDecode<JwtPayload>(storedToken);
+            if (!decoded?.id) {
+                throw new Error("Invalid token payload");
+            }
+            // Fetch full user data
+            const res = await axios.get(`${baseURL}/api/web/user/profile`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                },
+            });
+
+            if (res.status === 200) {
+                setUser(res.data);
+                setToken(storedToken);
+                await refreshVerificationStatus();
+            } else {
+                throw new Error("Failed to fetch user profile");
+            }
+        } catch (error) {
+            console.error("Initialization error:", error);
+            logout();
+        } finally {
+            setLoading(false);
+        }
+    }, [logout, refreshVerificationStatus]);
+
+
+    // Set up token and user persistence
     useEffect(() => {
         const storedToken = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
+        if (storedToken) {
+            setToken(storedToken);
+            initializeUser();
+        }
+    }, [initializeUser]);
 
-        if (storedToken) setToken(storedToken);
-        if (storedUser) setUser(JSON.parse(storedUser));
-
-        setLoading(false); // ✅ Done loading
-    }, []);
-
-    // Save user to localStorage when updated
+    // Update local storage when user changes
     useEffect(() => {
         if (user) {
             localStorage.setItem("user", JSON.stringify(user));
-        } else {
-            localStorage.removeItem("user");
         }
-    }
-        , [user]);
+    }, [user]);
 
-    const logout = () => {
-        setUser(null);
-        setToken(null);
-        localStorage.clear();
-    };
+    // Handle token changes
+    useEffect(() => {
+        if (token) {
+            localStorage.setItem("token", token);
+            initializeUser();
+        }
+    }, [token, initializeUser]);
 
     return (
         <UserContext.Provider
             value={{
                 user,
                 token,
-                isVerified: isVerified ?? false,
+                isVerified,
+                setIsVerified,
                 loading,
                 setUser,
                 setToken,
-                setIsVerified,
-                setLoading,
                 logout,
+                refreshVerificationStatus,
+                initializeUser,
             }}
-
         >
             {children}
         </UserContext.Provider>
     );
 };
 
-export const useUser = () => useContext(UserContext);
+export const useUser = () => {
+    const context = useContext(UserContext);
+    if (!context) {
+        throw new Error("useUser must be used within a UserProvider");
+    }
+    return context;
+};

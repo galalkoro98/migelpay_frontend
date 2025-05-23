@@ -2,31 +2,23 @@ import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { FaGoogle, FaFacebook, FaSpinner } from "react-icons/fa";
-import { baseURL } from '@/utils/baseURL';
-import { useGoogleLogin } from "@/hooks/useGoogleLogin";
-import { useFacebookLogin } from "@/hooks/useFacebookLogin";
+import { FaSpinner } from "react-icons/fa";
+import { baseURL } from '@/shared/utils/baseURL';
+import AuthPageWrapper from "@/shared/components/AuthPageWrapper";
+import FacebookAuthButton from "@/modules/auth/components/FacebookAuthButton";
+import GoogleAuthButton from "@/modules/auth/components/GoogleAuthButton";
+
 
 export default function LoginPage() {
-    const [useEmail, setUseEmail] = useState(true);
-    const [identifier, setIdentifier] = useState("");
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [firebaseToken, setFirebaseToken] = useState("");
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const [otpSent, setOtpSent] = useState(false);
     const router = useRouter();
-    const { triggerGoogleLogin } = useGoogleLogin();
-    const { triggerFacebookLogin } = useFacebookLogin();
 
     const validateInputs = () => {
-        if (useEmail) {
-            if (!identifier || !password) return "Email and password are required";
-            if (!/\S+@\S+\.\S+/.test(identifier)) return "Invalid email format";
-        } else {
-            if (!identifier) return "Phone number is required";
-            if (!firebaseToken) return "OTP is required";
-        }
+        if (!email || !password) return "Email and password are required";
+        if (!/\S+@\S+\.\S+/.test(email)) return "Invalid email format";
         return null;
     };
 
@@ -34,8 +26,6 @@ export default function LoginPage() {
         e.preventDefault();
         setError(null);
         setLoading(true);
-        setOtpSent(false);
-
 
         const validationError = validateInputs();
         if (validationError) {
@@ -45,144 +35,91 @@ export default function LoginPage() {
         }
 
         try {
-            const payload = useEmail
-                ? { identifier, password }
-                : { identifier, firebaseToken };
+            const res = await axios.post(`${baseURL}/api/web/auth/login/user-login`, {
+                email,
+                password
+            });
 
-            const res = await axios.post(`${baseURL}/api/web/auth/login/user-login`, payload);
-            if (res.data.jwt) {
-                localStorage.setItem("token", res.data.jwt);
-                localStorage.setItem("user", JSON.stringify(res.data.user));
-                router.push("/dashboard");
+            // ✅ Proper token validation
+            if (!res.data?.token) {
+                throw new Error("No token received from server");
             }
+
+            // ✅ Verify token structure before storing
+            const token = res.data.token;
+            if (typeof token !== "string" || !token.startsWith("eyJ")) {
+                throw new Error("Invalid token format");
+            }
+
+            localStorage.setItem("token", token);
+            router.push("/dashboard");
+
         } catch (err) {
-            const msg = axios.isAxiosError(err) && err.response?.data?.message
-                ? err.response.data.message[0]?.messages[0]?.message
-                : "An unexpected error occurred.";
-            setError(msg);
-        } finally {
-            setLoading(false);
-        }
-    };
+            localStorage.removeItem("token"); // Clear invalid tokens
 
-    const handleSendOtp = async () => {
-        setError(null);
-        if (!identifier) return setError("Phone number is required");
-
-        try {
-            setLoading(true);
-            setOtpSent(false);
-            setFirebaseToken("");
-            setError(null);
-            await axios.post(`${baseURL}/api/web/auth/phone/signup`, { phone: identifier });
-            setError("OTP sent successfully to your phone number");
-
-            setOtpSent(true);
-        } catch {
-            setError("Failed to send OTP");
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || "Login failed");
+            } else {
+                setError(err instanceof Error ? err.message : "An error occurred");
+            }
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-gray-500 via-green-500 to-blue-600">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-                <h1 className="text-2xl font-bold text-center mb-6 text-black">LOGIN</h1>
+        <div className="flex items-center justify-center  from-gray-500 via-green-500 to-blue-600  bg-gradient-to-b">
+                <AuthPageWrapper title="Login" >
 
-                {/* Toggle Between Email & Phone */}
-                <div className="flex mb-4">
-                    <button
-                        onClick={() => setUseEmail(true)}
-                        className={`flex-1 py-2 rounded-l ${useEmail ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-                    >
-                        Email
-                    </button>
-                    <button
-                        onClick={() => setUseEmail(false)}
-                        className={`flex-1 py-2 rounded-r ${!useEmail ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
-                    >
-                        Phone
-                    </button>
-                </div>
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full p-3 mb-4 border rounded"
+                            required
+                        />
+                        <input
+                            type="password"
+                            placeholder="Password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full p-3 mb-2 border rounded"
+                            required
+                        />
 
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type={useEmail ? "email" : "tel"}
-                        placeholder={useEmail ? "Email" : "Phone Number (e.g. +249...)"}
-                        value={identifier}
-                        onChange={(e) => setIdentifier(e.target.value)}
-                        className="w-full p-3 mb-4 border rounded"
-                    />
-
-                    {useEmail ? (
-                        <>
-                            <input
-                                type="password"
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full p-3 mb-4 border rounded"
-                            />
-                            <div className="text-right mb-4">
-                                <Link href="/auth/reset-password" className="text-sm text-blue-600 hover:underline">
-                                    Forgot password?
-                                </Link>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="flex gap-2 mb-4">
-                            <input
-                                placeholder="Enter OTP"
-                                value={firebaseToken}
-                                onChange={(e) => setFirebaseToken(e.target.value)}
-                                className="flex-1 p-3 border rounded"
-                                disabled={!otpSent}
-                            />
-                            <button
-                                type="button"
-                                onClick={handleSendOtp}
-                                disabled={otpSent}
-                                className="bg-blue-500 text-white px-4 rounded disabled:bg-gray-300"
-                            >
-                                {otpSent ? "Sent" : "Get OTP"}
-                            </button>
+                        <div className="text-right mb-4">
+                            <Link href="/auth/reset-password" className="text-sm text-blue-600 hover:underline">
+                                Forgot password?
+                            </Link>
                         </div>
-                    )}
 
-                    {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+                        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded mb-4 flex items-center justify-center gap-2 disabled:opacity-70"
-                    >
-                        {loading && <FaSpinner className="animate-spin" />}
-                        LOGIN
-                    </button>
-                </form>
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-3 rounded mb-4 flex items-center justify-center gap-2 disabled:opacity-70"
+                        >
+                            {loading && <FaSpinner className="animate-spin" />}
+                            LOGIN
+                        </button>
+                    </form>
 
-                <p className="text-center text-sm mb-2 text-blue-500 font-bold">Or login with</p>
 
-                <div className="flex justify-between mb-4">
-                    <button
-                        className="w-[48%] flex items-center justify-center gap-2 border py-2 rounded bg-blue-900 text-white hover:bg-blue-800"
-                        onClick={triggerFacebookLogin}
-                    >
-                        <FaFacebook className="text-xl" /> Facebook
-                    </button>
-                    <button
-                        onClick={triggerGoogleLogin}
-                        className="w-[48%] flex items-center justify-center gap-2 border py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                    >
-                        <FaGoogle className="text-xl" /> Google
-                    </button>
-                </div>
+                    <p className="text-center text-sm mb-2 text-blue-500 font-bold">Or login with</p>
 
-                <p className="text-sm text-center text-black">
-                    Not a member? <Link href="/auth/signup" className="text-blue-600 hover:underline">Sign up now</Link>
-                </p>
+                    <div className="flex justify-between mb-4">
+                        <GoogleAuthButton />
+                        <FacebookAuthButton />
+                    </div>
+
+                    <p className="text-sm text-center text-black">
+                        Not a member? <Link href="/auth/signup" className="text-blue-600 hover:underline">Sign up now</Link>
+                    </p>
+                </AuthPageWrapper >
             </div>
-        </div>
+   
     );
 }

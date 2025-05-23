@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import axios from "axios";
 import { useRouter } from 'next/router';
-import DashboardLayout from '@/components/DashboardLayout';
-import { baseURL } from '@/utils/baseURL';
+import DashboardLayout from '@/layout/DashboardLayout';
+import { baseURL } from '@/shared/utils/baseURL';
 import { Loader } from 'lucide-react';
 import { useUser } from '@/context/UserContext';
 
@@ -12,16 +12,18 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (!token) {
-            router.push('/auth/login');
+            // router.push('/auth/login');
             return;
         }
 
         const checkVerification = async () => {
             try {
-                const res = await axios.get(`${baseURL}/api/user/verification-status`, {
+                const res = await axios.get(`${baseURL}/api/web/user/verification-status`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                setIsVerified(res.data.verified);
+                const { idVerified, addressVerified, faceMatched } = res.data;
+                const fullyVerified = idVerified && addressVerified && faceMatched;
+                setIsVerified(fullyVerified);
             } catch {
                 setIsVerified(false);
             }
@@ -80,7 +82,7 @@ const Dashboard = () => {
                                 Transactions
                             </button>
 
-                            <button onClick={() => router.push('/dashboard/services')} className="p-4 bg-green-100 text-green-700 rounded-lg shadow hover:bg-green-200">Services</button>
+                            <button onClick={() => router.push('/services')} className="p-4 bg-green-100 text-green-700 rounded-lg shadow hover:bg-green-200">Services</button>
                             <button onClick={() => router.push('/')} className="p-4 bg-green-100 text-green-700 rounded-lg shadow hover:bg-green-200">Back to Home</button>
                         </div>
                     </div>

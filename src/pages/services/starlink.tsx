@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { CURRENCY_RATES } from '@/utils/currencyRates';
-import { baseURL } from '@/utils/baseURL';
+import DefaultLayout from '@/layout/DefaultLayout';
+import { CURRENCY_RATES } from '@/shared/utils/currencyRates';
+import { baseURL } from '@/shared/utils/baseURL';
 import Link from 'next/link';
+import { contactInfo } from '@/shared/utils/info';
+import { starlinkPageContent } from '@/shared/constants/translations/starlink';
 
 export default function StarlinkPayment() {
+    const [language, setLanguage] = useState<'en' | 'ar'>('en');
     const [formData, setFormData] = useState({
+        fullName: '',
+        contactInfo: '',
         email: '',
         password: '',
         subscriptionAmount: '',
@@ -16,9 +20,18 @@ export default function StarlinkPayment() {
         paymentProof: null as File | null,
         termsAgreed: false
     });
+
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const PROCESSING_FEE = 26000; // 26,000 SDG
+    const t = starlinkPageContent[language];
+
+    useEffect(() => {
+        const storedLanguage = localStorage.getItem('migelpay-lang') as 'en' | 'ar';
+        if (storedLanguage) {
+            setLanguage(storedLanguage);
+        }
+    }, []);
 
     // Calculate amount whenever amount or currency changes
     useEffect(() => {
@@ -55,6 +68,8 @@ export default function StarlinkPayment() {
 
         try {
             const formPayload = new FormData();
+            formPayload.append('fullName', formData.fullName);
+            formPayload.append('contactInfo', formData.contactInfo);
             formPayload.append('email', formData.email);
             formPayload.append('password', formData.password);
             formPayload.append('subscriptionAmount', formData.subscriptionAmount);
@@ -79,6 +94,8 @@ export default function StarlinkPayment() {
             setSubmissionStatus('success');
 
             setFormData({
+                fullName: '',
+                contactInfo: '',
                 email: '',
                 password: '',
                 subscriptionAmount: '',
@@ -94,43 +111,15 @@ export default function StarlinkPayment() {
         }
     };
 
-    const contactInfo = {
-        bankAccount: '4393322',
-        bankName: 'Bank of Khartoum - بنكك',
-        accountName: 'اسحق ادم الحاج',
-        whatsapp: '+32499891600',
-        telegram: '@MigelPaySupport',
-        telegramChannelInvitationCode: 't.me/+D4g4YNEh-ClzNDU0',
-        responseTime: 'a minutes',
-        contactPerson: {
-            name: 'Galal Ali',
-            position: 'Starlink Payment Manager',
-            photo: '/assets/galal.jpg'
-        }
-    };
+
     return (
-        <>
-            <Navbar />
-            {/* space between navbar and man*/}
+        <DefaultLayout>
             <div className="h-5"></div>
             <main className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-gray-50 to-white">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-12">
-                        <div className="w-20 h-20 rounded-full  border-white-600">
-                            {/* text in the same line of log */}
-
-                            <Image
-                                src="/assets/starlink.png"
-                                alt="MigelPay Logo"
-                                width={80}
-                                height={80}
-                                className="object-cover w-full h-full"
-                            />
-                        </div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-4">Starlink Bill Payment Service</h1>
-                        <p className="text-lg text-gray-600">
-                            Enter your Starlink subscription amount and we&apos;ll calculate the equivalent in Sudanese Pounds
-                        </p>
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4">{t.title}</h1>
+                        <p className="text-lg text-gray-600">{t.subtitle}</p>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -142,7 +131,7 @@ export default function StarlinkPayment() {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label htmlFor="currency" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Your Currency
+                                            {t.currencyLabel}
                                         </label>
                                         <select
                                             id="currency"
@@ -151,18 +140,20 @@ export default function StarlinkPayment() {
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                         >
-                                            <option value="USD">US Dollar (USD)</option>
-                                            <option value="EUR">Euro (EUR)</option>
-                                            <option value="NGN">Nigerian Naira (NGN)</option>
-                                            <option value="KES">Kenyan Shilling (KES)</option>
-                                            <option value="PHP">Philippine Peso (PHP)</option>
-                                            <option value="SDG">Sudanese Pound (SDG)</option>
+                                            <option value="USD">{t.currencies.USD} (USD)</option>
+                                            <option value="EUR">{t.currencies.EUR} (EUR)</option>
+                                            <option value="NGN">{t.currencies.NGN} (NGN)</option>
+                                            <option value="KES">{t.currencies.KES} (KES)</option>
+                                            <option value="PHP">{t.currencies.PHP}(PHP)</option>
+                                            <option value="MWK">{t.currencies.MWK} (MWK)</option>
+                                            <option value="ZMW">{t.currencies.ZMW} (ZMW)</option>
+                                            <option value="SDG">{t.currencies.SDG} (SDG)</option>
                                         </select>
                                     </div>
 
                                     <div>
                                         <label htmlFor="subscriptionAmount" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Monthly Amount
+                                            {t.amountLabel}
                                         </label>
                                         <div className="relative">
                                             <input
@@ -184,7 +175,11 @@ export default function StarlinkPayment() {
                                                             formData.currency === 'NGN' ? '₦' :
                                                                 formData.currency === 'KES' ? 'KSh' :
                                                                     formData.currency === 'PHP' ? '₱' :
-                                                                        'SDG'}
+                                                                        formData.currency === 'MWK' ? 'MK' :
+                                                                            formData.currency === 'ZMW' ? 'ZK' :
+                                                                                formData.currency === 'SDG' ? 'جنيه' :
+                                                                                    ''}
+
                                                 </span>
                                             </div>
                                         </div>
@@ -195,36 +190,68 @@ export default function StarlinkPayment() {
                                 {calculatedAmount > 0 && (
                                     <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
                                         <div className="text-center">
-                                            <p className="text-sm text-blue-600 mb-1">Payment Breakdown</p>
+                                            <p className="text-sm text-blue-600 mb-1">{t.paymentBreakdown}</p>
                                             <div className="flex justify-between mb-1">
-                                                <span className="text-sm">Converted Amount:</span>
+                                                <span className="text-sm">{t.convertedAmount}:</span>
                                                 <span className="text-sm font-medium">
                                                     {Math.ceil((parseFloat(formData.subscriptionAmount) || 0) *
-                                                        CURRENCY_RATES[formData.currency as keyof typeof CURRENCY_RATES]).toLocaleString()} SDG
+                                                        CURRENCY_RATES[formData.currency as keyof typeof CURRENCY_RATES]).toLocaleString()} {t.currencies.SDG} (SDG)
                                                 </span>
                                             </div>
                                             <div className="flex justify-between mb-2">
-                                                <span className="text-sm">Processing Fee:</span>
-                                                <span className="text-sm font-medium">{PROCESSING_FEE.toLocaleString('en-US')} SDG</span>
+                                                <span className="text-sm">{t.processingFee}:</span>
+                                                <span className="text-sm font-medium">{PROCESSING_FEE.toLocaleString('en-US')}{t.currencies.SDG} (SDG)</span>
                                             </div>
                                             <div className="border-t border-blue-200 pt-2">
-                                                <p className="text-sm text-blue-600">Total Amount to Send:</p>
+                                                <p className="text-sm text-blue-600">{t.totalLabel}:</p>
                                                 <p className="text-2xl font-bold text-blue-700">
-                                                    {calculatedAmount.toLocaleString('en-US')} SDG
+                                                    {calculatedAmount.toLocaleString('en-US')}{t.currencies.SDG} (SDG)
                                                 </p>
                                             </div>
-                                            <p className="text-xs text-blue-500 mt-1">
-                                                Send this exact total amount to avoid processing delays
-                                            </p>
+                                            <p className="text-xs text-blue-500 mt-1">{t.warningNote}</p>
                                         </div>
                                     </div>
                                 )}
 
                                 {/* Account Information */}
                                 <div className="space-y-4">
+                                    {/* Full Name */}
+                                    <div>
+                                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.nameLabel}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="fullName"
+                                            name="fullName"
+                                            value={formData.fullName}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                                            placeholder="John Doe"
+                                        />
+                                    </div>
+
+                                    {/* Preferred Contact Method */}
+                                    <div>
+                                        <label htmlFor="contactInfo" className="block text-sm font-medium text-gray-700 mb-1">
+                                            {t.contactLabel}
+                                        </label>
+                                        <input
+                                            type="text"
+                                            id="contactInfo"
+                                            name="contactInfo"
+                                            value={formData.contactInfo}
+                                            onChange={handleChange}
+                                            required
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                                            placeholder="+1234567890 or https://t.me/username or Facebook link"
+                                        />
+                                    </div>
+
                                     <div>
                                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                            Starlink Account Email
+                                            {t.emailLabel}
                                         </label>
                                         <input
                                             type="email"
@@ -240,7 +267,7 @@ export default function StarlinkPayment() {
 
                                     <div>
                                         <label htmlFor="password" className="block text-sm font-medium text-gray-900 mb-1">
-                                            Starlink Account Password
+                                            {t.passwordLabel}
                                         </label>
                                         <input
                                             type="password"
@@ -253,7 +280,7 @@ export default function StarlinkPayment() {
                                             placeholder="••••••••"
                                         />
                                         <p className="mt-1 text-xs text-gray-500">
-                                            We only use this to process your payment. Consider changing your password after.
+                                            {t.passwordHint}
                                         </p>
                                     </div>
                                 </div>
@@ -261,7 +288,7 @@ export default function StarlinkPayment() {
                                 {/* Payment Proof */}
                                 <div>
                                     <label htmlFor="paymentProof" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Payment Proof (Screenshot/Receipt)
+                                        {t.uploadProof}
                                     </label>
                                     <input
                                         type="file"
@@ -288,12 +315,16 @@ export default function StarlinkPayment() {
                                         />
                                     </div>
                                     <div className="ml-3 text-sm">
-                                        <label htmlFor="termsAgreed" className="font-medium text-gray-700">
-                                            I confirm that I&apos;ve sent {calculatedAmount > 0 ? calculatedAmount.toLocaleString('en-US') : '______'} SDG
-                                            (including {PROCESSING_FEE.toLocaleString('en-US')} SDG fee) to MigelPay
+                                        <label htmlFor="termsAgreed" className="font-medium text-gray-700 ">
+                                            {t.termsLabel(calculatedAmount.toLocaleString('en-US'), PROCESSING_FEE.toLocaleString('en-US'))}
+                                            {/* I confirm that I&apos;ve sent {calculatedAmount > 0 ? calculatedAmount.toLocaleString('en-US') : '______'} SDG
+                                            (including {PROCESSING_FEE.toLocaleString('en-US')} SDG fee) to MigelPay */}
                                         </label>
                                         <p className="text-gray-500">
-                                            By checking this box, you agree to our <Link href="/services/terms" className="text-blue-600 hover:underline">terms of service</Link>.
+                                            {t.termsAgree}
+                                            <Link href="/services/terms" className="text-blue-600 hover:underline">
+                                                {t.termsLink}
+                                            </Link>.
                                         </p>
                                     </div>
                                 </div>
@@ -301,22 +332,12 @@ export default function StarlinkPayment() {
                                 {/* Submit Button */}
                                 <div>
                                     {/* <Recaptcha onVerify={handleCaptcha} /> */}
-                                    <p className="text-xs text-gray-500 mb-2">We use reCAPTCHA to prevent spam.</p>
+                                    <p className="text-xs text-gray-500 mb-2">{t.recaptchaNote}</p>
                                     <button
                                         type="submit"
-                                        disabled={
-                                            !formData.termsAgreed ||
-                                            submissionStatus === 'submitting' ||
-                                            !formData.email ||
-                                            !formData.password ||
-                                            !formData.subscriptionAmount ||
-                                            !formData.invoiceNumber ||
-                                            !formData.paymentProof ||
-                                            calculatedAmount <= 0
-                                        }
                                         className={`w-full py-2 px-4 rounded-md text-white font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${submissionStatus === 'submitting' ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
                                     >
-                                        Submit Payment Request
+                                        {submissionStatus === 'submitting' ? 'Submitting...' : t.submit}
                                     </button>
                                 </div>
 
@@ -327,7 +348,8 @@ export default function StarlinkPayment() {
                                             <svg className="h-5 w-5 text-green-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            Your payment request has been submitted successfully! We&apos;ll contact you within {contactInfo.responseTime}.
+                                            {/* Your payment request has been submitted successfully! We&apos;ll contact you within {contactInfo.responseTime}. */}
+                                            {t.successMsg(contactInfo.responseTime)}
                                         </div>
                                     </div>
                                 )}
@@ -338,7 +360,8 @@ export default function StarlinkPayment() {
                                             <svg className="h-5 w-5 text-red-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                                             </svg>
-                                            There was an error submitting your request. Please try again or contact support.
+                                            {/* There was an error submitting your request. Please try again or contact support. */}
+                                            {t.errorMsg}
                                         </div>
                                     </div>
                                 )}
@@ -347,24 +370,22 @@ export default function StarlinkPayment() {
 
                         {/* Payment Information Sidebar */}
                         <div className="bg-white p-6 rounded-xl shadow-md text-gray-900">
-                            <h2 className="text-xl font-bold text-gray-900 mb-4">Payment Instructions</h2>
-
+                            <h2 className="text-xl font-bold text-gray-900 mb-4">{t.instructionsTitle}</h2>
                             <div className="space-y-6">
                                 <div>
-                                    <h3 className="font-medium text-gray-900 mb-2">Bank Transfer Details</h3>
+                                    <h3 className="font-medium text-gray-900 mb-2">{t.bankTitle}</h3>
                                     <div className="bg-gray-50 p-4 rounded-md">
-                                        <p className="text-sm"><span className="font-medium">Bank Name:</span> {contactInfo.bankName}</p>
-                                        <p className="text-sm"><span className="font-medium">Account Name:</span> {contactInfo.accountName}</p>
-                                        <p className="text-sm"><span className="font-medium">Account Number:</span> {contactInfo.bankAccount}</p>
-                                        <p className="text-sm mt-2 text-red-600 font-medium">Important: Include your email in the payment reference</p>
+                                        <p className="text-sm"><span className="font-medium">{t.bankName}</span> </p>
+                                        <p className="text-sm"><span className="font-medium">{t.accountName}</span></p>
+                                        <p className="text-sm"><span className="font-medium">{t.bankAccount}</span></p>
+                                        <p className="text-sm mt-2 text-red-600 font-medium">{t.includeEmailNote}</p>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <h3 className="font-medium text-gray-900 mb-4">Contact After Payment</h3>
+                                    <h3 className="font-medium text-gray-900 mb-4">{t.contactAfterPayment}</h3>
                                     <div className="bg-gray-50 p-4 rounded-lg shadow-sm flex flex-col items-center text-center space-y-4">
                                         <div className="relative">
-
                                             <Image
                                                 src={contactInfo.contactPerson.photo}
                                                 alt={contactInfo.contactPerson.name}
@@ -374,9 +395,9 @@ export default function StarlinkPayment() {
                                             />
                                         </div>
                                         <div>
-                                            <p className="text-lg font-semibold">{contactInfo.contactPerson.name}</p>
-                                            <p className="text-sm text-gray-600 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full shadow-sm ">{contactInfo.contactPerson.position}</p>
-                                            <p className="text-sm text-gray-500">Reach out to us after sending your payment</p>
+                                            <p className="text-lg font-semibold">{t.contactPerson}</p>
+                                            <p className="text-sm text-gray-600 bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full shadow-sm ">{t.contactPosition}</p>
+                                            <p className="text-sm text-gray-500">{t.contactHint}</p>
                                         </div>
                                         <div className="flex flex-col space-y-2 w-full">
                                             <a
@@ -385,7 +406,7 @@ export default function StarlinkPayment() {
                                                 rel="noopener noreferrer"
                                                 className="w-full inline-block bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2 px-4 rounded-md transition"
                                             >
-                                                📱 Contact via WhatsApp
+                                                {t.contactWhatsapp}
                                             </a>
                                             <a
                                                 href={`https://t.me/${contactInfo.telegram.replace('@', '')}`}
@@ -393,7 +414,7 @@ export default function StarlinkPayment() {
                                                 rel="noopener noreferrer"
                                                 className="w-full inline-block bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-md transition"
                                             >
-                                                💬 Chat on Telegram
+                                                {t.contactTelegram}
                                             </a>
                                             <a
                                                 href={`https://${contactInfo.telegramChannelInvitationCode}`}
@@ -401,7 +422,7 @@ export default function StarlinkPayment() {
                                                 rel="noopener noreferrer"
                                                 className="w-full inline-block bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium py-2 px-4 rounded-md transition"
                                             >
-                                                📢 Join Telegram Channel
+                                                {t.contactChannel}
                                             </a>
                                         </div>
                                     </div>
@@ -409,21 +430,25 @@ export default function StarlinkPayment() {
 
 
                                 <div className="bg-blue-50 p-4 rounded-md">
-                                    <h3 className="font-medium text-blue-800 mb-1">Processing Time</h3>
+                                    <h3 className="font-medium text-blue-800 mb-1">{t.processingTimeTitle}</h3>
                                     <p className="text-sm text-blue-700">
-                                        Your Starlink service will be renewed within {contactInfo.responseTime} after payment verification.
+                                        {t.processingTimeText}
+                                        {/* <span className="font-semibold">{contactInfo.responseTime}</span>. */}
                                     </p>
                                 </div>
 
                                 <div className="border-t border-gray-200 pt-4">
-                                    <h3 className="font-medium text-gray-900 mb-2">Important Notes</h3>
+                                    <h3 className="font-medium text-gray-900 mb-2">{t.notesTitle}</h3>
                                     <ul className="text-sm text-gray-600 space-y-2 list-disc pl-5">
-                                        <li>Send the exact calculated amount in SDG</li>
-                                        <li>Include your email in the payment reference</li>
-                                        <li>Contact us immediately if you encounter any issues</li>
-                                        <li>Keep your payment proof until service is renewed</li>
-                                        <li>We don&apos;t charge any extra fees - you pay only the converted amount</li>
-                                        <li>Total payment includes a {PROCESSING_FEE.toLocaleString('en-US')} SDG processing fee</li>
+                                        {t.notes.map((note, index) => (
+                                            <li key={index} className="flex items-start">
+                                                <svg className="h-5 w-5 text-blue-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                                </svg>
+                                                {typeof note === 'function' ? note(PROCESSING_FEE.toLocaleString('en-US')) : note}
+                                            </li>
+                                        ))}
+
                                     </ul>
                                 </div>
                             </div>
@@ -431,7 +456,6 @@ export default function StarlinkPayment() {
                     </div>
                 </div >
             </main >
-            <Footer />
-        </>
+        </DefaultLayout>
     );
 }

@@ -1,53 +1,75 @@
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import { useEffect, useState } from 'react';
+import { contactInfo } from '@/shared/utils/info';
+import DefaultLayout from '@/layout/DefaultLayout';
+import { aboutContent } from '@/shared/constants/translations/about';
 
 export default function About() {
+  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+
+  useEffect(() => {
+    const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
+    setLanguage(lang);
+  }, []);
+
+  const t = aboutContent[language];
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Navbar />
-      
-      <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg p-6 sm:p-8 text-gray-700">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">About MigelPay</h1>
-          
-          <div className="prose prose-blue max-w-none">
-            <p className="text-lg">
-              MigelPay is a financial service provider specializing in digital payment solutions 
-              for international services like Starlink.
-            </p>
+    <DefaultLayout>
+      <div className="bg-gray-50">
+        <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+          <div className="bg-white shadow rounded-lg p-6 sm:p-8 text-gray-700">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6">{t.title}</h1>
 
-            <h2 className="text-xl font-semibold mt-6">Our Mission</h2>
-            <p>
-              To simplify cross-border payments and make global digital services accessible 
-              to everyone, regardless of location or banking limitations.
-            </p>
+            <div className="prose prose-blue max-w-none">
+              <p className="text-lg">{t.intro}</p>
 
-            <h2 className="text-xl font-semibold mt-6">What We Do</h2>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Process Starlink subscription payments</li>
-              <li>Convert currencies at competitive rates</li>
-              <li>Provide reliable payment solutions</li>
-              <li>Offer 24/7 customer support</li>
-            </ul>
+              <h2 className="text-xl font-semibold mt-6">{t.missionTitle}</h2>
+              <p>{t.mission}</p>
 
-            <h2 className="text-xl font-semibold mt-6">Our Team</h2>
-            <p>
-              Founded in 2022, our team consists of payment processing experts, 
-              financial technology specialists, and customer service professionals 
-              dedicated to making your experience seamless.
-            </p>
+              <h2 className="text-xl font-semibold mt-6">{t.whatWeDoTitle}</h2>
+              <ul className="list-disc pl-5 space-y-1">
+                {t.whatWeDo.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
 
-            <div className="mt-8 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-800">Have Questions?</h3>
-              <p className="text-blue-600 mt-1">
-                Contact us at support@migelpay.com or through our WhatsApp/Telegram channels.
-              </p>
+              <h2 className="text-xl font-semibold mt-6">{t.teamTitle}</h2>
+              <p>{t.teamDesc}</p>
+
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+                <h3 className="font-medium text-blue-800">{t.contactHeader}</h3>
+                <p className="text-blue-600 mt-1">{t.contactText}</p>
+                <div className="flex flex-col space-y-2 w-full">
+                  <a
+                    href={`https://wa.me/${contactInfo.whatsapp.replace('+', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-block bg-green-500 hover:bg-green-600 text-white text-sm font-medium py-2 px-4 rounded-md transition"
+                  >
+                    {t.whatsapp}
+                  </a>
+                  <a
+                    href={`https://t.me/${contactInfo.telegram.replace('@', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-block bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-md transition"
+                  >
+                    {t.telegram}
+                  </a>
+                  <a
+                    href={`https://${contactInfo.telegramChannelInvitationCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-block bg-gray-700 hover:bg-gray-800 text-white text-sm font-medium py-2 px-4 rounded-md transition"
+                  >
+                    {t.channel}
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+        </main>
+      </div>
+    </DefaultLayout>
   );
 }

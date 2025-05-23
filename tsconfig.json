@@ -20,16 +20,17 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"],
-      "@hooks/*": ["./src/hooks/*"],
+
+      "@components/*": ["./src/shared/components/*"],
+      "@utils/*": ["./src/shared/utils/*"],
+      "@hooks/*": ["./src/shared/hooks/*"],
       "@context/*": ["./src/context/*"],
-      "@utils/*": ["./src/utils/*"],
-      "@styles/*": ["./src/styles/*"],
+      "@styles/*": ["./src/shared/styles/*"],
       "@assets/*": ["./src/assets/*"],
       "@pages/*": ["./src/pages/*"],
       "@types/*": ["./src/types/*"],
       "@constants/*": ["./src/constants/*"],
-      "@lib/*": ["./src/lib/*"],
+      "@lib/*": ["./src/shared/lib/*"],
       "@config/*": ["./src/config/*"],
       "@services/*": ["./src/services/*"]
     }
@@ -39,9 +40,15 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "next-i18next.config.mjs"
-, "next-sitemap.config.js"  ],
-  "exclude": ["node_modules"]
+    "next-sitemap.config.js",
+    "next.config.ts",
+    "tailwind.config.js",
+    "postcss.config.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  "exclude": ["node_modules"],
+  "typeRoots": ["./node_modules/@types", "./types"]
 }
-
-
