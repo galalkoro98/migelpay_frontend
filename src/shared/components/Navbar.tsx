@@ -53,7 +53,7 @@ export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProp
   ];
 
   return (
-    <nav className="bg-white dark:bg-gray-700 shadow-md py-3 px-6 flex justify-between items-center fixed w-full top-0 z-50">
+    <nav className="bg-white dark:bg-gray-700 shadow-md py-3 px-6 flex justify-between items-center fixed w-full top-0 z-50 font-size-bold">
       <div className="flex items-center space-x-3">
         <Link href="/" className="flex items-center space-x-2">
           <Image src="/assets/favicon.ico" alt="MigelPay Logo" width={40} height={40} className="rounded-full border-2 border-blue-600" />
@@ -63,7 +63,7 @@ export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProp
 
       <div className="hidden md:flex items-center space-x-6">
         {navItems.map((item) => (
-          <Link key={item.path} href={item.path} className="text-gray-700 dark:text-gray-200 hover:text-blue-600 transition font-medium relative space-x-6 ml-10">
+          <Link key={item.path} href={item.path} className="text-gray-700 dark:text-gray-700 hover:text-blue-900 transition font-bold relative space-x-6 ml-10">
             {item.name}
           </Link>
         ))}
@@ -71,16 +71,16 @@ export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProp
         <div className="relative language-selector">
           <div onClick={() => setShowDropdown(!showDropdown)}
             // space between the icon and text
-            className="flex items-center text-gray-700 dark:text-gray-200 hover:text-blue-600 cursor-pointer transition font-medium"
+            className="flex items-center text-gray-700 dark:text-gray-700 hover:text-blue-600 cursor-pointer transition font-bold"
             aria-label="Language Selector">
             <FaGlobe className="mr-1 pace-x-2 ml-1" />
 
-            <span className="text-sm font-medium uppercase hidden sm:block text-gray-700 dark:text-gray-200">
+            <span className="text-sm font-bold uppercase hidden sm:block text-gray-700 dark:text-gray-200">
               {language === 'en' ? 'English' : 'العربية'}
             </span>
           </div>
           {showDropdown && (
-            <div className={`absolute ${language === 'ar' ? 'left-0' : 'right-0'} mt-2 w-24 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10`}>
+            <div className={`absolute ${language === 'ar' ? 'left-0' : 'right-0'} mt-2 w-24 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 font-bold`}>
               {['en', 'ar'].map((lang) => (
                 <button key={lang} onClick={() => { changeLanguage(lang as 'en' | 'ar'); setShowDropdown(false); }}
                   className={`block w-full text-left px-4 py-1 text-sm hover:bg-blue-50 dark:hover:bg-gray-700 ${language === lang ? 'bg-blue-50 dark:bg-gray-700' : ''}`}>
@@ -126,17 +126,17 @@ export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProp
             <div className="flex space-x-2">
               {['en', 'ar'].map((lang) => (
                 <button key={lang} onClick={() => { changeLanguage(lang as 'en' | 'ar'); setMenuOpen(false); }}
-                  className={`px-3 py-1 rounded text-sm ${language === lang ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-600'}`}>
+                  className={`px-3 py-1 rounded text-sm ${language === lang ? 'bg-blue-600' : 'bg-blue-100 text-blue-600'}`}>
                   {lang.toUpperCase()}
                 </button>
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Link href="/auth/login" className="block text-center border border-blue-600 text-blue-600 py-2 rounded-lg font-medium" onClick={() => setMenuOpen(false)}>
+          <div className="grid grid-cols-2 gap-3 ">
+            <Link href="/auth/login" className="block text-center border border-blue-600 text-blue-600 py-2 rounded-lg font-bold" onClick={() => setMenuOpen(false)}>
               {t.login}
             </Link>
-            <Link href="/auth/signup" className="block text-center bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 cursor-pointer" onClick={() => setMenuOpen(false)}>
+            <Link href="/auth/signup" className="block text-center bg-blue-600 text-white py-2 rounded-lg font-medium hover:bg-blue-700 cursor-pointer " onClick={() => setMenuOpen(false)}>
               {t.signup}
             </Link>
           </div>
