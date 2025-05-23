@@ -23,7 +23,7 @@ export default function StarlinkPayment() {
 
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-    const PROCESSING_FEE = 26000; // 26,000 SDG
+    const PROCESSING_FEE = 20000; // 26,000 SDG
     const t = starlinkPageContent[language];
 
     useEffect(() => {

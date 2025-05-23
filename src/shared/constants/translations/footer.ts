@@ -25,7 +25,7 @@ export const footerContent = {
         subscribe: "Subscribe",
         placeholderEmail: "Your email",
         coFounderInfo: {
-            name: "Galal Koro",
+            name: "Galal Ali",
             title: "Co-Founder & CEO",
             ceoQuote: "Building the future of payments with security and innovation at our core.",
         },
@@ -53,7 +53,7 @@ export const footerContent = {
         subscribe: "اشترك",
         placeholderEmail: "بريدك الإلكتروني",
         coFounderInfo: {
-            name: "جلال كورو",
+            name: "جلال علي",
             title: "المؤسس المشارك والرئيس التنفيذي",
             ceoQuote: "نبني مستقبل المدفوعات مع الأمان والابتكار في جوهرنا.",
         },
