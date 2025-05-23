@@ -46,8 +46,7 @@ export const starlinkPageContent = {
         termsLink: "terms of service",
         recaptchaNote: "We use reCAPTCHA to prevent spam.",
         submit: "Submit Payment Request",
-        successMsg: (time: string) =>
-            `Your payment request has been submitted successfully! We'll contact you within ${time}.`,
+        successMsg: "Payment request submitted successfully! We'll get back to you within a minutes.",
         errorMsg: "There was an error submitting your request. Please try again or contact support.",
         instructionsTitle: "Payment Instructions",
         bankTitle: "Bank Transfer Details",
@@ -107,8 +106,7 @@ export const starlinkPageContent = {
         termsLink: "شروط الخدمة",
         recaptchaNote: "نستخدم reCAPTCHA لمنع الرسائل المزعجة.",
         submit: "إرسال طلب الدفع",
-        successMsg: (time: string) =>
-            `تم إرسال طلب الدفع بنجاح! سنتواصل معك خلال ${time}.`,
+        successMsg: "تم إرسال طلب الدفع بنجاح! سنتواصل معك خلال دقائق.",
         errorMsg: "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى أو التواصل مع الدعم.",
         instructionsTitle: "تعليمات الدفع",
         bankTitle: "تفاصيل التحويل البنكي",
