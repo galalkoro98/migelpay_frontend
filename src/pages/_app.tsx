@@ -3,6 +3,7 @@ import Head from "next/head";
 import type { AppProps } from "next/app";
 import { UserProvider } from "@/context/UserContext";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LanguageProvider } from "@/context/LanguageContext";
 import "@/shared/styles/globals.css";
 
 function App({ Component, pageProps }: AppProps) {
@@ -55,12 +56,14 @@ function App({ Component, pageProps }: AppProps) {
                 <meta name="twitter:creator" content="@MigelPay" />
                 <meta name="twitter:domain" content="migelpay.com" />
             </Head>
+            <LanguageProvider>
+                <ThemeProvider>
+                    <UserProvider>
+                        <Component {...pageProps} />
+                    </UserProvider>
+                </ThemeProvider>
+            </LanguageProvider>
 
-            <ThemeProvider>
-                <UserProvider>
-                    <Component {...pageProps} />
-                </UserProvider>
-            </ThemeProvider>
         </>
     );
 }

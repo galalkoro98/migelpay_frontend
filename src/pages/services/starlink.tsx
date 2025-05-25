@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import DefaultLayout from '@/layout/DefaultLayout';
-import { CURRENCY_RATES } from '@/shared/utils/currencyRates';
+import { CURRENCY_TO_EUR } from '@/shared/utils/currencyRates';
 import { baseURL } from '@/shared/utils/baseURL';
 import Link from 'next/link';
 import { contactInfo } from '@/shared/utils/info';
-import { starlinkPageContent } from '@/shared/constants/translations/starlink';
+import { starlinkPageContent } from '@/shared/constants/translations/services/starlink';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function StarlinkPayment() {
-    const [language, setLanguage] = useState<'en' | 'ar'>('en');
     const [formData, setFormData] = useState({
         fullName: '',
         contactInfo: '',
@@ -20,30 +20,33 @@ export default function StarlinkPayment() {
         paymentProof: null as File | null,
         termsAgreed: false
     });
-
+    const [convertedAmount, setConvertedAmount] = useState(0);
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
     const PROCESSING_FEE = 20000; // 26,000 SDG
+    const { language } = useLanguage();
     const t = starlinkPageContent[language];
-
-    useEffect(() => {
-        const storedLanguage = localStorage.getItem('migelpay-lang') as 'en' | 'ar';
-        if (storedLanguage) {
-            setLanguage(storedLanguage);
-        }
-    }, []);
 
     // Calculate amount whenever amount or currency changes
     useEffect(() => {
         if (formData.subscriptionAmount && formData.currency) {
             const amount = parseFloat(formData.subscriptionAmount) || 0;
-            const rate = CURRENCY_RATES[formData.currency as keyof typeof CURRENCY_RATES];
-            const convertedAmount = Math.ceil(amount * rate);
-            setCalculatedAmount(convertedAmount + PROCESSING_FEE); // Add fee to converted amount
+
+            const toEUR = CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR] || 0;
+            const SDG_PER_EUR = 2860;
+
+            const converted = Math.ceil(amount * toEUR * SDG_PER_EUR);
+            setConvertedAmount(converted);
+            setCalculatedAmount(converted + PROCESSING_FEE);
         } else {
+            setConvertedAmount(0);
             setCalculatedAmount(0);
         }
     }, [formData.subscriptionAmount, formData.currency]);
+
+
+
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value, type, checked } = e.target as HTMLInputElement;
@@ -188,15 +191,19 @@ export default function StarlinkPayment() {
 
                                 {/* Calculated Amount */}
                                 {calculatedAmount > 0 && (
-                                    <div className="bg-blue-50 p-4 rounded-md border border-blue-100">
-                                        <div className="text-center">
+                                    <div className="bg-blue-50 p-4 rounded-md border border-blue-100 ">
+                                        <div className="text-center ">
                                             <p className="text-sm text-blue-600 mb-1">{t.paymentBreakdown}</p>
-                                            <div className="flex justify-between mb-1">
-                                                <span className="text-sm">{t.convertedAmount}:</span>
+                                            <div className="flex justify-between mb-1 ">
+                                                <span className="text-sm ">{t.convertedAmount}:</span>
+                                                <span className="text-sm font-medium">{convertedAmount.toLocaleString('en-US')}{t.currencies.SDG} (SDG)</span>
+
+                                                {/* <span className="text-sm">{t.convertedAmount}:</span>
                                                 <span className="text-sm font-medium">
                                                     {Math.ceil((parseFloat(formData.subscriptionAmount) || 0) *
-                                                        CURRENCY_RATES[formData.currency as keyof typeof CURRENCY_RATES]).toLocaleString()} {t.currencies.SDG} (SDG)
-                                                </span>
+                                                        CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR]).toLocaleString()} {t.currencies.SDG} (SDG)
+                                                </span> */}
+
                                             </div>
                                             <div className="flex justify-between mb-2">
                                                 <span className="text-sm">{t.processingFee}:</span>
@@ -348,7 +355,7 @@ export default function StarlinkPayment() {
                                             <svg className="h-5 w-5 text-green-400 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                                 <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                             </svg>
-                                            
+
                                             {t.successMsg}
                                         </div>
                                     </div>

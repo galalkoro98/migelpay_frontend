@@ -1,14 +1,9 @@
-import React from "react";
 import DefaultLayout from "@/layout/DefaultLayout";
-import { faqPageContent } from "@/shared/constants/translations/faq";
+import { faqPageContent } from "@/shared/constants/translations/services/faq";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function FAQ() {
-    const [language, setLanguage] = React.useState<'en' | 'ar'>('en');
-    React.useEffect(() => {
-        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-        setLanguage(lang);
-    }, []);
-
+    const { language } = useLanguage();
     const t = faqPageContent[language];
 
     return (
@@ -39,7 +34,7 @@ export default function FAQ() {
                             </h3>
                             <p className="text-gray-600 mt-1">
                                 {t.contactSupportDesc} <span>
-                                    <a href="https://wa.me/1234567890" className="text-blue-600 hover:underline">WhatsApp</a> or <a href="https://t.me/yourtelegram" className="text-blue-600 hover:underline">Telegram</a>
+                                    <a href="https://wa.me/0032499891600" className="text-blue-600 hover:underline">WhatsApp</a> or <a href="https://t.me/MigelPaySupport" className="text-blue-600 hover:underline">Telegram</a>
                                 </span>
                             </p>
                         </div>

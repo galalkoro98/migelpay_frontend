@@ -1,31 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { FaMoneyBillWave, FaSatelliteDish, FaQuestionCircle, FaExchangeAlt } from "react-icons/fa";
 import DefaultLayout from "@/layout/DefaultLayout";
-import { homePageContent } from "@/shared/constants/translations/home";
+import { homePageContent } from "@/shared/constants/translations/views/home";
+import { useLanguage } from "@/context/LanguageContext";
 
-export default function HomePage({ currentLanguage }: { currentLanguage: 'en' | 'ar' }) {
-    const [language, setLanguage] = useState<'en' | 'ar'>('en');
+export default function HomePage() {
     const [amount, setAmount] = useState(1);
     const [currency, setCurrency] = useState("USD");
     const [convertedAmount, setConvertedAmount] = useState(2600);
     const [isClient, setIsClient] = useState(false);
+    const { language } = useLanguage();
+    const t = homePageContent[language];
+
+    const rates = useMemo(() => ({
+        USD: 2600,
+        EUR: 2800,
+        GBP: 3100,
+    }), []);
+
+    const updateConvertedAmount = useCallback((amt: number, curr: keyof typeof rates) => {
+        setConvertedAmount(amt * (rates[curr] || 2600));
+    }, [rates]);
 
     useEffect(() => {
-        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-        setLanguage(lang);
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = lang;
         setIsClient(true);
-    }, [currentLanguage]);
-
-    const t = homePageContent[language];
-    const rates = { USD: 2600, EUR: 2800, GBP: 3100 };
-
-    const updateConvertedAmount = (amt: number, curr: keyof typeof rates) => {
-        setConvertedAmount(amt * (rates[curr] || 2600));
-    };
+        updateConvertedAmount(amount, currency as keyof typeof rates);
+    }, [amount, currency, updateConvertedAmount]);
 
     return (
         <DefaultLayout>

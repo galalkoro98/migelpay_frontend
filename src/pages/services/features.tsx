@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import DefaultLayout from "@/layout/DefaultLayout";
-import { featuresPageContent } from "@/shared/constants/translations/features";
+import { featuresPageContent } from "@/shared/constants/translations/services/features";
+import { useLanguage } from "@/context/LanguageContext";
 
 import {
     FaMoneyBillWave,
@@ -20,12 +20,7 @@ import {
 } from "react-icons/fa";
 
 export default function LearnMore() {
-    const [language, setLanguage] = useState<'en' | 'ar'>('en');
-    useEffect(() => {
-        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-        setLanguage(lang);
-    }, []);
-
+    const { language } = useLanguage();
     const t = featuresPageContent[language];
 
     const features = [

@@ -1,27 +1,13 @@
-import { useEffect, useState } from 'react';
 import Navbar from '@/shared/components/Navbar';
 import Footer from '@/shared/components/Footer';
+// import { useLanguage } from '@/context/LanguageContext';
 
 export default function TermsOfService() {
-    const [language, setLanguage] = useState<'en' | 'ar'>('en');
-    useEffect(() => {
-        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-        setLanguage(lang);
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = lang;
-    }, [setLanguage]);
+    // const { language } = useLanguage();
+
     return (
         <div className="min-h-screen bg-gray-50">
-            <Navbar
-                currentLanguage={language}
-                onLanguageChange={(lang) => {
-                    localStorage.setItem('migelpay-lang', lang);
-                    setLanguage(lang);
-                    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-                    document.documentElement.lang = lang;
-                }}
-            />
-
+            <Navbar />
             <main className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
                 <div className="bg-white shadow rounded-lg p-6 sm:p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-6">Terms of Service</h1>
@@ -75,7 +61,7 @@ export default function TermsOfService() {
                 </div>
             </main>
 
-            <Footer currentLanguage={language} />
+            <Footer />
         </div>
     );
 }

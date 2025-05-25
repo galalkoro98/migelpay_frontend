@@ -1,16 +1,10 @@
-import { useEffect, useState } from 'react';
 import { contactInfo } from '@/shared/utils/info';
 import DefaultLayout from '@/layout/DefaultLayout';
-import { aboutContent } from '@/shared/constants/translations/about';
+import { aboutContent } from '@/shared/constants/translations/services/about';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function About() {
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-
-  useEffect(() => {
-    const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-    setLanguage(lang);
-  }, []);
-
+  const { language } = useLanguage();
   const t = aboutContent[language];
 
   return (

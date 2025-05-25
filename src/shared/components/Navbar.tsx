@@ -4,11 +4,12 @@ import Image from 'next/image';
 import { FaBars, FaTimes, FaGlobe } from 'react-icons/fa';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/context/ThemeContext';
-import { navbarContent } from '@/shared/constants/translations/navbar';
-import { NavbarProps } from '@/shared/types/navbarType';
+import { navbarContent } from '@/shared/constants/translations/views/navbar';
+import { useLanguage } from '@/context/LanguageContext';
+// import { NavbarProps } from '@/shared/types/navbarType';
 
-export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProps) {
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
+export default function Navbar() {
+  const { language, setLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -16,16 +17,10 @@ export default function Navbar({ currentLanguage, onLanguageChange }: NavbarProp
 
   const t = navbarContent[language];
 
-  useEffect(() => {
-    setLanguage(currentLanguage);
-  }, [currentLanguage]);
-
-  const changeLanguage = (lang: 'ar' | 'en') => {
-    localStorage.setItem('migelpay-lang', lang);
+  const changeLanguage = (lang: 'en' | 'ar') => {
     setLanguage(lang);
-    onLanguageChange(lang);
-    document.documentElement.dir = lang === 'ar' ? 'ltr' : 'rtl'; 
-    document.documentElement.lang = lang;
+    setShowDropdown(false);
+
   };
 
   useEffect(() => {

@@ -1,20 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Mail, Facebook, Twitter, Linkedin, Instagram } from 'lucide-react';
-import { useEffect, useState } from "react";
-import { footerContent, BottomBarPaths } from "@/shared/constants/translations/footer";
-import { FooterProps } from "@/shared/types/footerType";
+import { footerContent, BottomBarPaths } from "@/shared/constants/translations/views/footer";
+import { useLanguage } from "@/context/LanguageContext";
+// import { FooterProps } from "@/shared/types/footerType";
 
-export default function Footer({ currentLanguage }: FooterProps) {
-    const [language, setLanguage] = useState<'en' | 'ar'>('en');
-
-    useEffect(() => {
-        const lang = localStorage.getItem('migelpay-lang') as 'en' | 'ar' || 'en';
-        setLanguage(lang);
-        document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-        document.documentElement.lang = lang;
-    }, [currentLanguage]);
-
+export default function Footer() {
+    const { language } = useLanguage();
     const t = footerContent[language];
 
     return (
