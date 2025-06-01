@@ -23,7 +23,7 @@ export default function StarlinkPayment() {
     const [convertedAmount, setConvertedAmount] = useState(0);
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-    const PROCESSING_FEE = 20000; // 26,000 SDG
+    const PROCESSING_FEE = 15000; // 26,000 SDG
     const { language } = useLanguage();
     const t = starlinkPageContent[language];
 
@@ -33,7 +33,7 @@ export default function StarlinkPayment() {
             const amount = parseFloat(formData.subscriptionAmount) || 0;
 
             const toEUR = CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR] || 0;
-            const SDG_PER_EUR = 2860;
+            const SDG_PER_EUR = 2700;
 
             const converted = Math.ceil(amount * toEUR * SDG_PER_EUR);
             setConvertedAmount(converted);
@@ -146,9 +146,9 @@ export default function StarlinkPayment() {
                                             <option value="USD">{t.currencies.USD} (USD)</option>
                                             <option value="EUR">{t.currencies.EUR} (EUR)</option>
                                             <option value="NGN">{t.currencies.NGN} (NGN)</option>
-                                            <option value="KES">{t.currencies.KES} (KES)</option>
+                                            {/* <option value="KES">{t.currencies.KES} (KES)</option>
                                             <option value="PHP">{t.currencies.PHP}(PHP)</option>
-                                            <option value="MWK">{t.currencies.MWK} (MWK)</option>
+                                            <option value="MWK">{t.currencies.MWK} (MWK)</option> */}
                                             <option value="ZMW">{t.currencies.ZMW} (ZMW)</option>
                                             <option value="SDG">{t.currencies.SDG} (SDG)</option>
                                         </select>

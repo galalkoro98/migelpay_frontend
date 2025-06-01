@@ -15,9 +15,9 @@ export default function HomePage() {
     const t = homePageContent[language];
 
     const rates = useMemo(() => ({
-        USD: 2600,
-        EUR: 2800,
-        GBP: 3100,
+        USD: 2500,
+        EUR: 2650,
+        GBP: 2900,
     }), []);
 
     const updateConvertedAmount = useCallback((amt: number, curr: keyof typeof rates) => {
