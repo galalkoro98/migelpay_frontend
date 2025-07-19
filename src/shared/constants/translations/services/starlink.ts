@@ -20,8 +20,8 @@ export const starlinkPageContent = {
         currencyLabel: "The currency that you use to pay for Starlink",
         amountLabel: "Monthly Amount",
         currencies: {
-            USD: "United States Dollar",
             EUR: "Euro",
+            USD: "United States Dollar",
             NGN: "Nigerian Naira",
             KES: "Kenyan Shilling",
             PHP: "Philippine Peso",
@@ -80,8 +80,8 @@ export const starlinkPageContent = {
         currencyLabel: "العملة التي تستخدمها لدفع فاتورة ستارلينك",
         amountLabel: "المبلغ الشهري",
         currencies: {
-            USD: "دولار أمريكي",
             EUR: "يورو",
+            USD: "دولار أمريكي",
             NGN: "نايرا نيجيرية",
             KES: "شلن كيني",
             PHP: "بيزو فلبيني",

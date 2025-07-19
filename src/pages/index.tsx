@@ -8,20 +8,20 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export default function HomePage() {
     const [amount, setAmount] = useState(1);
-    const [currency, setCurrency] = useState("USD");
-    const [convertedAmount, setConvertedAmount] = useState(2600);
+    const [currency, setCurrency] = useState("EUR");
+    const [convertedAmount, setConvertedAmount] = useState(3200);
     const [isClient, setIsClient] = useState(false);
     const { language } = useLanguage();
     const t = homePageContent[language];
 
     const rates = useMemo(() => ({
-        USD: 2550,
-        EUR: 2700,
-        GBP: 3000,
+        USD: 2740,
+        EUR: 3200,
+        GBP: 3692,
     }), []);
 
     const updateConvertedAmount = useCallback((amt: number, curr: keyof typeof rates) => {
-        setConvertedAmount(amt * (rates[curr] || 2600));
+        setConvertedAmount(amt * (rates[curr] || 3200));
     }, [rates]);
 
     useEffect(() => {
@@ -106,7 +106,7 @@ export default function HomePage() {
                                     value={amount}
                                     onChange={(e) => {
                                         setAmount(Number(e.target.value));
-                                        updateConvertedAmount(Number(e.target.value), currency as "USD" | "EUR" | "GBP");
+                                        updateConvertedAmount(Number(e.target.value), currency as "EUR" | "USD" | "GBP");
                                     }}
                                     className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
                                     min="1"
@@ -115,13 +115,13 @@ export default function HomePage() {
                                     value={currency}
                                     onChange={(e) => {
                                         setCurrency(e.target.value);
-                                        updateConvertedAmount(amount, e.target.value as "USD" | "EUR" | "GBP");
+                                        updateConvertedAmount(amount, e.target.value as "EUR" | "USD" | "GBP");
                                     }}
                                     className="w-full mt-3 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
                                 >
-                                    <option value="USD">USD</option>
-                                    <option value="EUR">EUR</option>
-                                    <option value="GBP">GBP</option>
+                                    <option value="EUR">EUR(€)</option>
+                                    <option value="USD">USD($)</option>
+                                    <option value="GBP">GBP(£)</option>
                                 </select>
                             </div>
 

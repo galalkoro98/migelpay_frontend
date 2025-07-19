@@ -15,7 +15,7 @@ export default function StarlinkPayment() {
         email: '',
         password: '',
         subscriptionAmount: '',
-        currency: 'USD',
+        currency: 'EUR',
         invoiceNumber: '',
         paymentProof: null as File | null,
         termsAgreed: false
@@ -33,7 +33,7 @@ export default function StarlinkPayment() {
             const amount = parseFloat(formData.subscriptionAmount) || 0;
 
             const toEUR = CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR] || 0;
-            const SDG_PER_EUR = 2700;
+            const SDG_PER_EUR = 3200;
 
             const converted = Math.ceil(amount * toEUR * SDG_PER_EUR);
             setConvertedAmount(converted);
@@ -102,7 +102,7 @@ export default function StarlinkPayment() {
                 email: '',
                 password: '',
                 subscriptionAmount: '',
-                currency: 'USD',
+                currency: 'EUR',
                 invoiceNumber: '',
                 paymentProof: null,
                 termsAgreed: false
@@ -143,12 +143,12 @@ export default function StarlinkPayment() {
                                             onChange={handleChange}
                                             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                                         >
-                                            <option value="USD">{t.currencies.USD} (USD)</option>
                                             <option value="EUR">{t.currencies.EUR} (EUR)</option>
+                                            <option value="USD">{t.currencies.USD} (USD)</option>
                                             <option value="NGN">{t.currencies.NGN} (NGN)</option>
-                                            {/* <option value="KES">{t.currencies.KES} (KES)</option>
+                                            <option value="KES">{t.currencies.KES} (KES)</option>
                                             <option value="PHP">{t.currencies.PHP}(PHP)</option>
-                                            <option value="MWK">{t.currencies.MWK} (MWK)</option> */}
+                                            <option value="MWK">{t.currencies.MWK} (MWK)</option>
                                             <option value="ZMW">{t.currencies.ZMW} (ZMW)</option>
                                             <option value="SDG">{t.currencies.SDG} (SDG)</option>
                                         </select>
@@ -173,15 +173,16 @@ export default function StarlinkPayment() {
                                             />
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                                 <span className="text-gray-500">
-                                                    {formData.currency === 'USD' ? '$' :
+                                                    {
                                                         formData.currency === 'EUR' ? '€' :
-                                                            formData.currency === 'NGN' ? '₦' :
-                                                                formData.currency === 'KES' ? 'KSh' :
-                                                                    formData.currency === 'PHP' ? '₱' :
-                                                                        formData.currency === 'MWK' ? 'MK' :
-                                                                            formData.currency === 'ZMW' ? 'ZK' :
-                                                                                formData.currency === 'SDG' ? 'جنيه' :
-                                                                                    ''}
+                                                            formData.currency === 'USD' ? '$' :
+                                                                formData.currency === 'NGN' ? '₦' :
+                                                                    formData.currency === 'KES' ? 'KSh' :
+                                                                        formData.currency === 'PHP' ? '₱' :
+                                                                            formData.currency === 'MWK' ? 'MK' :
+                                                                                formData.currency === 'ZMW' ? 'ZK' :
+                                                                                    formData.currency === 'SDG' ? 'جنيه' :
+                                                                                        ''}
 
                                                 </span>
                                             </div>
