@@ -16,7 +16,7 @@ export default function HomePage() {
 
     const rates = useMemo(() => ({
         USD: 2750,
-        EUR: 3050,
+        EUR: 3100,
         GBP: 3600,
     }), []);
 
@@ -92,7 +92,94 @@ export default function HomePage() {
                 </section>
 
                 {/* Currency Converter */}
+                {/* Currency Converter */}
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-bold text-gray-900 mb-3">{t.converterTitle}</h2>
+                        <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
+                    </div>
+
+                    <div className="max-w-3xl mx-auto">
+                        {/* Exchange Rates Display */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                            {Object.entries(rates).map(([curr, rate]) => (
+                                <motion.div
+                                    key={curr}
+                                    whileHover={{ scale: 1.03 }}
+                                    className="bg-gray-50 p-6 rounded-lg shadow-sm border border-gray-200"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <div className="text-2xl font-bold text-gray-800">
+                                                1 {curr} = {rate} SDG
+                                            </div>
+                                            <div className="text-gray-600 mt-1">
+                                                {curr === "EUR" && "Euro (€)"}
+                                                {curr === "USD" && "US Dollar ($)"}
+                                                {curr === "GBP" && "British Pound (£)"}
+                                            </div>
+                                        </div>
+                                        <div className="text-blue-500 text-3xl">
+                                            <FaMoneyBillWave />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+
+                        {/* Converter Tool */}
+                        <div className="bg-gray-50 p-8 rounded-xl shadow-sm">
+                            <div className="flex items-center justify-between space-x-4">
+                                <div className="flex-1">
+                                    <input
+                                        type="number"
+                                        value={amount}
+                                        onChange={(e) => {
+                                            const value = Math.max(1, Number(e.target.value));
+                                            setAmount(value);
+                                            updateConvertedAmount(value, currency as "EUR" | "USD" | "GBP");
+                                        }}
+                                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800 text-lg"
+                                        min="1"
+                                    />
+                                    <select
+                                        value={currency}
+                                        onChange={(e) => {
+                                            setCurrency(e.target.value);
+                                            updateConvertedAmount(amount, e.target.value as "EUR" | "USD" | "GBP");
+                                        }}
+                                        className="w-full mt-3 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-800"
+                                    >
+                                        <option value="EUR">Euro (€)</option>
+                                        <option value="USD">US Dollar ($)</option>
+                                        <option value="GBP">British Pound (£)</option>
+                                    </select>
+                                </div>
+
+                                <div className="text-blue-500 transform rotate-90 md:rotate-0">
+                                    <FaExchangeAlt className="text-2xl" />
+                                </div>
+
+                                <div className="flex-1 bg-blue-50 p-4 rounded-lg border border-blue-100">
+                                    <div className="text-blue-600 text-sm font-medium">{t.youReceive}</div>
+                                    <div className="text-3xl font-bold text-blue-800">
+                                        {isClient ? convertedAmount.toLocaleString() : convertedAmount} SDG
+                                    </div>
+                                    <div className="text-blue-600 font-medium">Sudanese Pounds</div>
+                                </div>
+                            </div>
+
+                            {/* Rate Info */}
+                            <div className="mt-4 text-center text-gray-500 text-sm">
+                                Current rate: 1 {currency} = {rates[currency as keyof typeof rates]} SDG
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+
+
+                {/* <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 bg-white">
                     <div className="text-center mb-12">
                         <h2 className="text-3xl font-bold text-gray-900 mb-3">{t.converterTitle}</h2>
                         <div className="w-20 h-1 bg-blue-600 mx-auto"></div>
@@ -138,7 +225,7 @@ export default function HomePage() {
                             </div>
                         </div>
                     </div>
-                </section>
+                </section> */}
 
                 {/* CTA Section */}
                 <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 text-center">
