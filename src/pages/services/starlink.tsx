@@ -23,7 +23,7 @@ export default function StarlinkPayment() {
     const [convertedAmount, setConvertedAmount] = useState(0);
     const [calculatedAmount, setCalculatedAmount] = useState(0);
     const [submissionStatus, setSubmissionStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
-    const PROCESSING_FEE = 15000; // 26,000 SDG
+    const PROCESSING_FEE = 16000; // 16,000 SDG
     const { language } = useLanguage();
     const t = starlinkPageContent[language];
 
@@ -33,7 +33,7 @@ export default function StarlinkPayment() {
             const amount = parseFloat(formData.subscriptionAmount) || 0;
 
             const toEUR = CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR] || 0;
-            const SDG_PER_EUR = 3200;
+            const SDG_PER_EUR = 3400;
 
             const converted = Math.ceil(amount * toEUR * SDG_PER_EUR);
             setConvertedAmount(converted);
