@@ -41,7 +41,7 @@ function App({ Component, pageProps }: AppProps) {
                 {/* Open Graph */}
                 <meta property="og:title" content={t[language].title} />
                 <meta property="og:description" content={t[language].description} />
-                <meta property="og:image" content="/assets/og-image.png" />
+                <meta property="og:image" content="/assets/logo.jpeg" />
                 <meta property="og:url" content="https://www.migelpay.com" />
                 <meta property="og:type" content="website" />
 
@@ -49,7 +49,7 @@ function App({ Component, pageProps }: AppProps) {
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={t[language].title} />
                 <meta name="twitter:description" content={t[language].description} />
-                <meta name="twitter:image" content="/assets/twitter-image.png" />
+                <meta name="twitter:image" content="/assets/logo.jpeg" />
                 <meta name="twitter:domain" content="migelpay.com" />
 
                 <script type="application/ld+json" dangerouslySetInnerHTML={{
@@ -58,7 +58,7 @@ function App({ Component, pageProps }: AppProps) {
                         "@type": "Organization",
                         "name": "MigelPay",
                         "url": "https://www.migelpay.com",
-                        "logo": "https://www.migelpay.com/assets/og-image.png",
+                        "logo": "https://www.migelpay.com/assets/logo.jpeg",
                         "sameAs": [
                             "https://www.facebook.com/MigelPay",
                             "https://twitter.com/MigelPay",
