@@ -15,8 +15,8 @@ export default function HomePage() {
     const t = homePageContent[language];
 
     const rates = useMemo(() => ({
-        USD: 3000,
-        EUR: 3200,
+        USD: 3050,
+        EUR: 3250,
         GBP: 3900,
     }), []);
 
