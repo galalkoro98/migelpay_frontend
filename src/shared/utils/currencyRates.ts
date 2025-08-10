@@ -6,5 +6,5 @@ export const CURRENCY_TO_EUR = {
     PHP: 0.01576,     // 1 PHP = 0.01576 EUR
     MWK: 0.0051,      // 1 MWK = 0.0051 EUR
     ZMW: 0.033,       // 1 ZMW = 0.033 EUR
-    SDG: 1 / 3400     // 1 SDG = 0.000294 EUR
+    SDG: 1 / 3450     // 1 SDG = 0.000290 EUR
 };

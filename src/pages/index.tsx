@@ -9,19 +9,19 @@ import { useLanguage } from "@/context/LanguageContext";
 export default function HomePage() {
     const [amount, setAmount] = useState(1);
     const [currency, setCurrency] = useState("EUR");
-    const [convertedAmount, setConvertedAmount] = useState(3200);
+    const [convertedAmount, setConvertedAmount] = useState(3330); // Default conversion for EUR
     const [isClient, setIsClient] = useState(false);
     const { language } = useLanguage();
     const t = homePageContent[language];
 
     const rates = useMemo(() => ({
-        USD: 3050,
-        EUR: 3250,
+        EUR: 3330,
+        USD: 3100,
         GBP: 3900,
     }), []);
 
     const updateConvertedAmount = useCallback((amt: number, curr: keyof typeof rates) => {
-        setConvertedAmount(amt * (rates[curr] || 3200));
+        setConvertedAmount(amt * (rates[curr] || 3330));
     }, [rates]);
 
     useEffect(() => {
