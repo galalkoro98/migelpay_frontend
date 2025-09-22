@@ -33,7 +33,9 @@ export default function StarlinkPayment() {
             const amount = parseFloat(formData.subscriptionAmount) || 0;
 
             const toEUR = CURRENCY_TO_EUR[formData.currency as keyof typeof CURRENCY_TO_EUR] || 0;
-            const SDG_PER_EUR = 3450;
+            const SDG_PER_EUR = 3931; // 1 EUR = 3931 SDG
+
+            // Convert to EUR first, then to SDG, round up to nearest whole number
 
             const converted = Math.ceil(amount * toEUR * SDG_PER_EUR);
             setConvertedAmount(converted);
